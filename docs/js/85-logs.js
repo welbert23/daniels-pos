@@ -29,7 +29,7 @@ async function renderLogs(){
         <div class="spacer"></div><button class="btn btn-ghost btn-sm" onclick="renderLogs()">↻ Refresh</button>
       </div>
       <div class="card"><h3>Activity Log <span class="grow"></span><small>${rows.length} entries</small></h3>
-        <div class="tbl-wrap"><table><tr><th>When</th><th>User</th><th>Role</th><th>Action</th><th>Module</th><th>Details</th><th></th></tr>
+        <div class="tbl-wrap tbl-compact"><table><tr><th>When</th><th>User</th><th>Role</th><th>Action</th><th>Module</th><th>Details</th><th></th></tr>
           ${rows.length?rows.map(l=>`<tr><td class="num" style="white-space:nowrap" title="${esc(l.ts)}">${esc(fmtLogTs(l.ts))}</td><td><b>${esc(l.actor_name||'Unknown')}</b><small style="display:block;color:var(--mut2);font-size:9.5px">@${esc(l.actor_username||'—')}</small></td><td>${esc(l.actor_role||'—')}</td><td><span class="pill ${pc(l.action)}">${esc(l.action.toUpperCase())}</span></td><td>${esc(l.entity)}</td><td style="max-width:340px">${esc(l.summary)}</td><td>${(l.before_json||l.after_json)?`<button class="icon-btn view" title="View changes" onclick="viewLog(${l.id})"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>`:''}</td></tr>`).join(''):'<tr><td colspan="7" class="card-empty">No activity recorded yet</td></tr>'}
         </table></div></div>`;
   }catch(e){$('#content').innerHTML=`<div class="card"><div class="card-empty">Cannot load activity log — ${esc(e.message)}</div></div>`}

@@ -9,7 +9,7 @@ function renderUsers(){
   const db=load(),meU=session();
   $('#content').innerHTML=`
     <div class="toolrow"><span class="pill info">Superadmin only</span><div class="spacer"></div><button class="btn btn-sm" onclick="userForm()">+ Add User</button></div>
-    <div class="tbl-wrap"><table><tr><th>User</th><th>Username</th><th>Role</th><th>Access</th><th style="text-align:right">Actions</th></tr>
+    <div class="tbl-wrap tbl-compact"><table><tr><th>User</th><th>Username</th><th>Role</th><th>Access</th><th style="text-align:right">Actions</th></tr>
       ${db.users.map(u=>{const access=u.role==='superadmin'?'Full access':u.role==='client'?'Sales, Inventory, Customers, Reports':u.role==='inventory'?'Add/edit inventory (no delete, no POS)':'POS only, inventory view';
         return`<tr><td><b>${esc(u.name)}</b> ${u.id===meU?.id?'<span class="pill info">YOU</span>':''}</td><td class="num">${esc(u.username)}</td><td><span class="pill ${u.role==='superadmin'?'mut':u.role==='client'?'info':'warn'}">${ROLE_LABEL[u.role]}</span></td><td style="color:var(--mut)">${access}</td><td><div class="act"><button class="icon-btn edit" onclick="userForm('${u.id}')"><svg viewBox="0 0 24 24"><path d="M11 4H4v16h16v-7 M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button>${u.id!==meU?.id?`<button class="icon-btn del" onclick="delUser('${u.id}')"><svg viewBox="0 0 24 24"><path d="M3 6h18 M8 6V4h8v2 M6 6l1 14h10l1-14"/></svg></button>`:''}</div></td></tr>`}).join('')}
     </table></div>`;

@@ -138,7 +138,7 @@ input:focus{outline:none}
 .dbchip.err i{background:var(--danger)}
 .dbrefresh{font-family:var(--font-m);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:2px solid var(--ink);background:var(--surface);padding:5px 8px;box-shadow:2px 2px 0 var(--ink);white-space:nowrap}
 .dbrefresh:hover{background:var(--brand-l)}
-.content{flex:1;overflow-y:auto;padding:26px 28px 40px;background-image:radial-gradient(rgba(22,19,11,.05) 1px,transparent 1.4px);background-size:24px 24px}
+.content{flex:1;overflow-y:auto;padding:22px 20px 34px;background-image:radial-gradient(rgba(22,19,11,.05) 1px,transparent 1.4px);background-size:24px 24px}
 
 /* ============ KPI CARDS ============ */
 .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
@@ -299,20 +299,35 @@ input:focus{outline:none}
 /* ============ TABLES ============ */
 .toolrow{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
 .toolrow .spacer{flex:1}
-.tbl-wrap{overflow:auto;border:3px solid var(--ink);border-radius:var(--r);background:var(--surface);box-shadow:5px 5px 0 var(--ink)}
-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:620px}
-th{background:var(--black);color:var(--brand);font-family:var(--font-m);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;text-align:left;padding:12px 14px;border-bottom:2px solid var(--ink);white-space:nowrap}
-td{padding:12px 14px;border-bottom:1.5px solid var(--border2);vertical-align:middle}
+.tbl-wrap{overflow-x:auto;border:3px solid var(--ink);border-radius:var(--r);background:var(--surface);box-shadow:5px 5px 0 var(--ink)}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:0}
+th{background:var(--black);color:var(--brand);font-family:var(--font-m);font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:9px 10px;border-bottom:2px solid var(--ink);white-space:normal;line-height:1.25;vertical-align:bottom}
+td{padding:9px 10px;border-bottom:1.5px solid var(--border2);vertical-align:middle;overflow-wrap:anywhere}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--brand-l)}
-.num{font-variant-numeric:tabular-nums}
-.act{display:flex;gap:6px;justify-content:flex-end}
-.icon-btn{width:32px;height:32px;border-radius:var(--r);display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--ink);box-shadow:2px 2px 0 rgba(20,17,10,.24);transition:.08s;cursor:pointer}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.act{display:flex;gap:4px;justify-content:flex-end}
+.tbl-wrap .pill{font-size:8px;padding:2px 5px;border-width:1.5px;white-space:nowrap}
+.tbl-wrap td>small{font-size:8.5px;line-height:1.3}
+.icon-btn{width:28px;height:28px;border-radius:var(--r);display:inline-flex;align-items:center;justify-content:center;border:2px solid var(--ink);box-shadow:2px 2px 0 rgba(20,17,10,.24);transition:.08s;cursor:pointer;flex:none}
 .icon-btn:active{box-shadow:0 0 0 var(--ink);transform:translate(2px,2px)}
-.icon-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.icon-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .icon-btn.view{background:var(--info-l);color:var(--info)}.icon-btn.view:hover{background:#A9CEFF}
 .icon-btn.edit{background:var(--ok-l);color:#0A6B25}.icon-btn.edit:hover{background:#A9EBBB}
 .icon-btn.del{background:var(--danger-l);color:#B32016}.icon-btn.del:hover{background:#FFB9B2}
+.tbl-compact table{font-size:11px}
+.tbl-compact th,.tbl-compact td{padding:6px 7px}
+.tbl-wide table{font-size:10px;table-layout:auto}
+.tbl-wide th{font-size:7.5px;padding:5px 4px;letter-spacing:0;line-height:1.1}
+.tbl-wide td{padding:5px 4px;font-size:10px;white-space:nowrap;max-width:112px;overflow:hidden;text-overflow:ellipsis}
+.tbl-wide td.num{white-space:nowrap}
+.tbl-wide .pill{font-size:7px;padding:1px 3px;border-width:1px;letter-spacing:0}
+.tbl-wide td>small{font-size:8px}
+@media(max-width:1200px){
+  .tbl-compact th,.tbl-compact td{padding:5px 5px}
+  .tbl-wide th,.tbl-wide td{padding:4px 3px}
+  .tbl-wide td{max-width:96px}
+}
 
 /* ============ REPORTS ============ */
 .chart{display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:8px}

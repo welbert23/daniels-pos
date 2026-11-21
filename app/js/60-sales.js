@@ -24,7 +24,7 @@ function renderSales(){
       ${[['all','All'],['today','Today'],['completed','Completed'],['cancelled','Cancelled']].map(([k,l])=>`<div class="cat-pill ${salesFilter===k?'active':''}" onclick="salesFilter='${k}';renderSales()">${l}</div>`).join('')}
       <div class="spacer"></div>${srvOps?'<button class="btn btn-ghost btn-sm" onclick="exportSalesCSV()">Export CSV</button>':''}
     </div>
-    <div class="tbl-wrap"><table><tr><th>Ref</th><th>Date</th><th>Cashier</th><th>Customer</th><th>Order</th><th>Items</th><th>Total</th><th>Status</th><th style="text-align:right">Actions</th></tr>
+    <div class="tbl-wrap tbl-compact"><table><tr><th>Ref</th><th>Date</th><th>Cashier</th><th>Customer</th><th>Order</th><th>Items</th><th>Total</th><th>Status</th><th style="text-align:right">Actions</th></tr>
       ${list.length?list.map(t=>`<tr><td><b>${t.ref}</b></td><td class="num">${fmtDT(t.date)}</td><td>${esc(cashierName(t,db))}</td><td>${esc(t.customer||'Walk-in')}</td><td><span class="pill info">${esc(t.orderType||'Dine-in')}</span></td><td class="num">${t.items.reduce((s,i)=>s+i.qty,0)}</td><td class="num"><b>PHP ${money0(t.total)}</b></td><td><span class="pill ${t.status==='completed'?'ok':'bad'}">${t.status.toUpperCase()}</span></td><td><div class="act"><button class="icon-btn view" onclick="viewSale('${t.id}')"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>${srvOps&&t.status==='completed'?`<button class="icon-btn del" onclick="voidSale('${t.id}')" title="Void"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`:''}</div></td></tr>`).join(''):`<tr><td colspan="9" class="card-empty">No orders found</td></tr>`}
     </table></div>`;
 }
