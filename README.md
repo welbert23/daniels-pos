@@ -34,7 +34,7 @@ The GitHub repository is **public**, and the static frontend is published with G
 
 **https://welbert23.github.io/daniels-pos/**
 
-GitHub Pages can only serve static files (`pages/`). PHP and MySQL cannot run there, so `api.php` stays on your PC.
+GitHub Pages can only serve static files from `docs/`. PHP and MySQL cannot run there, so `api.php` stays on your PC.
 
 - **Offline mode (default):** open the Pages URL as-is. The app uses the offline queue and any data already saved in that browser. To move old browser data into MySQL, use **↑ Import local** from the Desktop `app\index.html`.
 - **Live MySQL:** double-click **`app\start-live.bat`** to start XAMPP and a Cloudflare HTTPS tunnel, then open:
@@ -81,8 +81,7 @@ POS-System/
 │   ├── start-pos.bat       XAMPP + browser launcher
 │   ├── start-live.bat      XAMPP + public HTTPS tunnel launcher
 │   └── README-DATABASE.md  detailed database docs
-├── docs/         → PDF modules, documentation, session notes
-├── pages/        → Generated static site served by GitHub Pages (no PHP/MySQL)
+├── docs/         → PDF modules, session notes, and generated GitHub Pages site (no PHP/MySQL)
 ├── design/       → Penpot UX/UI files, screenshots, design zips
 ├── tools/        → Screenshot/PDF scripts, start-live.ps1, build-pages.ps1
 ├── archive/      → Old/unused versions (index-design2.html, index-standalone.html, app-standalone.js)
