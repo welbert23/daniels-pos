@@ -320,6 +320,7 @@ tr:hover td{background:var(--brand-l)}
 .tbl-wide table{font-size:10px;table-layout:auto}
 .tbl-wide th{font-size:7.5px;padding:5px 4px;letter-spacing:0;line-height:1.1}
 .tbl-wide td{padding:5px 4px;font-size:10px;white-space:nowrap;max-width:112px;overflow:hidden;text-overflow:ellipsis}
+.tbl-wide td:first-child{max-width:150px}
 .tbl-wide td.num{white-space:nowrap}
 .tbl-wide .pill{font-size:7px;padding:1px 3px;border-width:1px;letter-spacing:0}
 .tbl-wide td>small{font-size:8px}
