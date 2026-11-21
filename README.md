@@ -1,6 +1,6 @@
-# Daniel's Barbecue & Restaurant — POS System
+# Daniel's Barbecue & Restaurant â€” POS System
 
-MySQL-backed POS, inventory, ingredients, attendance, schedules, and audit trail. The database is the source of truth — there is no hardcoded business data in the frontend.
+MySQL-backed POS, inventory, ingredients, attendance, schedules, and audit trail. The database is the source of truth â€” there is no hardcoded business data in the frontend.
 
 ---
 
@@ -20,7 +20,7 @@ Double-click **`app\start-pos.bat`**. It starts XAMPP (Apache + MySQL) and opens
 | Role | Username / Password | Access |
 |---|---|---|
 | **Superadmin** | `user / <redacted>` | Everything, including **Users** and DB tools |
-| **Client** | `client / <redacted>` | POS, inventory, ingredients, customers, sales, reports, schedules — **no** Users / DB tools |
+| **Client** | `client / <redacted>` | POS, inventory, ingredients, customers, sales, reports, schedules â€” **no** Users / DB tools |
 | **Cashier** | `staff / <redacted>` | POS only; view-only inventory/ingredients/time in-out |
 | **Inventory** | `inventory / <redacted>` | Add/edit inventory & ingredients, **no delete**, no POS |
 
@@ -38,31 +38,21 @@ GitHub Pages is not available for a private repository on a free account, so the
 3. Open that URL on any device (phone, tablet, another PC).
 4. The current URL is also saved to `app\live-url.txt`.
 
-The tunnel points to your local `daniels-pos` app, so **MySQL still runs on your PC**. Changes made on the server appear immediately after a page refresh or **↻ Reload DB**. The GitHub repo stays private and is only a code backup.
+The tunnel points to your local `daniels-pos` app, so **MySQL still runs on your PC**. Changes made on the server appear immediately after a page refresh or **â†» Reload DB**. The GitHub repo stays private and is only a code backup.
 
 > The tunnel URL changes every time it restarts. Anyone with the URL can reach the login page, so do not share it publicly. General access control is UI-level; add network/auth protection before exposing it widely.
 
 Requires `cloudflared` (installed via `winget install Cloudflare.cloudflared`).
 
-### Fixed URL via Firebase Hosting
-
-The static frontend is live at **https://red-plate-pos.web.app**. The current tunnel API URL is embedded into `public/js/00-api-config.js` when building, so the short URL works on any device without `?api=`.
-
-After restarting the tunnel:
-1. Run `app\start-live.bat` to refresh `app\live-url.txt`.
-2. Run `tools\deploy-firebase.ps1` to rebuild and redeploy with the new API URL.
-
----
-
 ## Features
 
-- **Point of Sale** — FEFO deduction; the same ingredient with different expiry dates is treated as separate batches.
-- **Inventory & Ingredients** — dynamic categories; new categories can be added directly from the Category dropdown.
-- **Attendance** — `TIME IN → LUNCH OUT → LUNCH IN → COFFEE OUT → COFFEE IN → TIME OUT`. Early TIME OUT is allowed after TIME IN or LUNCH IN.
-- **Schedules** — 2-week cycle: **Week 1 = odd ISO weeks**, **Week 2 = even ISO weeks**. Only Superadmin/Client can set them; only Cashier/Inventory can be scheduled. The current week is shown in the Time In/Out header.
-- **Attendance flags** — `ON TIME`, `LATE Xm`, `ABSENT`, `UNDERTIME Xm`, `DAY OFF`, `NO SCHEDULE`.
-- **Activity Log** — who, when, what action, and before/after values; readable date/time; passwords are masked.
-- **DB tools** — `↻ Reload DB`, `↑ Import local`, `phpMyAdmin ↗`, and the status chip — **superadmin only**.
+- **Point of Sale** â€” FEFO deduction; the same ingredient with different expiry dates is treated as separate batches.
+- **Inventory & Ingredients** â€” dynamic categories; new categories can be added directly from the Category dropdown.
+- **Attendance** â€” `TIME IN â†’ LUNCH OUT â†’ LUNCH IN â†’ COFFEE OUT â†’ COFFEE IN â†’ TIME OUT`. Early TIME OUT is allowed after TIME IN or LUNCH IN.
+- **Schedules** â€” 2-week cycle: **Week 1 = odd ISO weeks**, **Week 2 = even ISO weeks**. Only Superadmin/Client can set them; only Cashier/Inventory can be scheduled. The current week is shown in the Time In/Out header.
+- **Attendance flags** â€” `ON TIME`, `LATE Xm`, `ABSENT`, `UNDERTIME Xm`, `DAY OFF`, `NO SCHEDULE`.
+- **Activity Log** â€” who, when, what action, and before/after values; readable date/time; passwords are masked.
+- **DB tools** â€” `â†» Reload DB`, `â†‘ Import local`, `phpMyAdmin â†—`, and the status chip â€” **superadmin only**.
 
 ---
 
@@ -70,20 +60,20 @@ After restarting the tunnel:
 
 ```
 POS-System/
-├── app/          → RUNNABLE POS
-│   ├── index.html          markup
-│   ├── styles.css          all CSS
-│   ├── js/                 15 feature modules (see below)
-│   ├── api.php             MySQL bridge (bootstrap/save/audit/attendance/schedules)
-│   ├── database.sql        schema + initial users/categories
-│   ├── start-pos.bat       XAMPP + browser launcher
-│   ├── start-live.bat      XAMPP + public HTTPS tunnel launcher
-│   └── README-DATABASE.md  detailed database docs
-├── docs/         → PDF modules, documentation, session notes
-├── design/       → Penpot UX/UI files, screenshots, design zips
-├── tools/        → Screenshot/PDF scripts + start-live.ps1 tunnel launcher
-├── archive/      → Old/unused versions (index-design2.html, index-standalone.html, app-standalone.js)
-└── README.md     → This file
+â”œâ”€â”€ app/          â†’ RUNNABLE POS
+â”‚   â”œâ”€â”€ index.html          markup
+â”‚   â”œâ”€â”€ styles.css          all CSS
+â”‚   â”œâ”€â”€ js/                 15 feature modules (see below)
+â”‚   â”œâ”€â”€ api.php             MySQL bridge (bootstrap/save/audit/attendance/schedules)
+â”‚   â”œâ”€â”€ database.sql        schema + initial users/categories
+â”‚   â”œâ”€â”€ start-pos.bat       XAMPP + browser launcher
+â”‚   â”œâ”€â”€ start-live.bat      XAMPP + public HTTPS tunnel launcher
+â”‚   â””â”€â”€ README-DATABASE.md  detailed database docs
+â”œâ”€â”€ docs/         â†’ PDF modules, documentation, session notes
+â”œâ”€â”€ design/       â†’ Penpot UX/UI files, screenshots, design zips
+â”œâ”€â”€ tools/        â†’ Screenshot/PDF scripts + start-live.ps1 tunnel launcher
+â”œâ”€â”€ archive/      â†’ Old/unused versions (index-design2.html, index-standalone.html, app-standalone.js)
+â””â”€â”€ README.md     â†’ This file
 ```
 
 ### JavaScript modules (`app/js/`)
@@ -117,8 +107,8 @@ Data lives in **XAMPP MySQL**, not in the project folder:
 | Database | `daniels_pos` |
 | MySQL user | `root` (blank password) |
 | Physical files | `C:\xampp\mysql\data\daniels_pos\` |
-| Web root (junction) | `C:\xampp\htdocs\daniels-pos` → `...\POS-System\app` |
-| Viewer | **phpMyAdmin ↗** button in the POS topbar (superadmin) |
+| Web root (junction) | `C:\xampp\htdocs\daniels-pos` â†’ `...\POS-System\app` |
+| Viewer | **phpMyAdmin â†—** button in the POS topbar (superadmin) |
 
 Tables: `meta`, `users`, `categories`, `items`, `item_recipes`, `ingredients`, `customers`, `transactions`, `transaction_items`, `attendance`, `schedules`, `audit_log`.
 
@@ -131,19 +121,19 @@ Initial users and categories are defined in `app\database.sql`. All items, recip
 ### Import old localStorage data
 1. Open the **Desktop** `app\index.html` (not the localhost URL) so the old browser data is accessible.
 2. Log in as superadmin.
-3. Click **↑ Import local** in the topbar and confirm.
+3. Click **â†‘ Import local** in the topbar and confirm.
 
 ### Set a schedule
-1. Superadmin/Client → **Time In/Out → ⚙ Schedules**.
+1. Superadmin/Client â†’ **Time In/Out â†’ âš™ Schedules**.
 2. Choose a Cashier or Inventory user.
 3. Select days for **Week 1** and **Week 2**, plus time in/out and grace period.
 4. If Week 2 is left empty, Week 1 is used.
 
 ### Add a category
-In the Inventory or Ingredients form, choose **+ Add new category…** from the dropdown, then type the name.
+In the Inventory or Ingredients form, choose **+ Add new categoryâ€¦** from the dropdown, then type the name.
 
 ### Manual insert in phpMyAdmin
-Close all POS tabs first, insert the row in phpMyAdmin, then log in as superadmin and click **↻ Reload DB** so the full-state sync does not overwrite it.
+Close all POS tabs first, insert the row in phpMyAdmin, then log in as superadmin and click **â†» Reload DB** so the full-state sync does not overwrite it.
 
 ---
 
@@ -152,10 +142,10 @@ Close all POS tabs first, insert the row in phpMyAdmin, then log in as superadmi
 | Symptom | Solution |
 |---|---|
 | Stale UI / new code not showing | **Ctrl+F5** or run `start-pos.bat` again |
-| `DB offline — queued` | MySQL is not running. Run `start-pos.bat` again, then click **↻ Reload DB** — queued changes sync automatically. |
+| `DB offline â€” queued` | MySQL is not running. Run `start-pos.bat` again, then click **â†» Reload DB** â€” queued changes sync automatically. |
 | `Database has no users` | Import `app\database.sql` in phpMyAdmin. |
 | No schedule flags appearing | No schedule has been set yet; set one as Superadmin/Client. |
-| `No partitioning defined` in phpMyAdmin | Normal informational text — not an error. |
+| `No partitioning defined` in phpMyAdmin | Normal informational text â€” not an error. |
 | Old `Penpot-UXUI` folder cannot be deleted | Wait for a PC restart. Its contents were already copied to `design\Penpot-UXUI` and the old folder is hidden. |
 
 ---

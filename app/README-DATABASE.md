@@ -1,16 +1,16 @@
-# Daniel's POS — MySQL Database Edition
+# Daniel's POS â€” MySQL Database Edition
 
 All business data lives in **XAMPP MySQL** (`daniels_pos`). When you add, edit, or delete something in the app, the change is immediately visible in **phpMyAdmin**.
 
-> There is no hardcoded business data in the frontend. Users, categories, items, recipes, ingredients, customers, and transactions all come from MySQL. Initial users/categories are defined in `database.sql`; old localStorage data is imported **explicitly** with **↑ Import local**.
+> There is no hardcoded business data in the frontend. Users, categories, items, recipes, ingredients, customers, and transactions all come from MySQL. Initial users/categories are defined in `database.sql`; old localStorage data is imported **explicitly** with **â†‘ Import local**.
 
 ---
 
 ## 1. Start and database access
 
-1. Double-click `start-pos.bat` — it starts XAMPP Apache + MySQL and opens the app.
+1. Double-click `start-pos.bat` â€” it starts XAMPP Apache + MySQL and opens the app.
 2. Log in as **superadmin**.
-3. Click **phpMyAdmin ↗** in the topbar, or open:
+3. Click **phpMyAdmin â†—** in the topbar, or open:
    `http://localhost/phpmyadmin/index.php?route=/database/structure&db=daniels_pos`
 
 | Item | Value |
@@ -20,9 +20,9 @@ All business data lives in **XAMPP MySQL** (`daniels_pos`). When you add, edit, 
 | User | `root` |
 | Password | *(blank)* |
 | Physical files | `C:\xampp\mysql\data\daniels_pos\` |
-| Web root | `C:\xampp\htdocs\daniels-pos` → junction to the **`app`** folder |
+| Web root | `C:\xampp\htdocs\daniels-pos` â†’ junction to the **`app`** folder |
 
-> **Superadmin only** can see the DB controls: **↻ Reload DB**, **↑ Import local**, **phpMyAdmin ↗**, and the status chip. They are hidden from Client, Cashier, and Inventory; `refreshDB()` / `importLocal()` also have a `requireSuper()` guard even if called from the console.
+> **Superadmin only** can see the DB controls: **â†» Reload DB**, **â†‘ Import local**, **phpMyAdmin â†—**, and the status chip. They are hidden from Client, Cashier, and Inventory; `refreshDB()` / `importLocal()` also have a `requireSuper()` guard even if called from the console.
 
 ---
 
@@ -35,11 +35,10 @@ GitHub Pages cannot be used with a private repository on a free plan, so a **Clo
    `https://<random>.trycloudflare.invalid/daniels-pos/index.html?v=16`
 3. Open that URL on another device. It is also saved to `app\live-url.txt`.
 
-The tunnel points directly to the local `daniels-pos` app, so the API call is still the relative `api.php` and the database remains your local MySQL. Server-side changes show up after a refresh or **↻ Reload DB**.
+The tunnel points directly to the local `daniels-pos` app, so the API call is still the relative `api.php` and the database remains your local MySQL. Server-side changes show up after a refresh or **â†» Reload DB**.
 
 The URL changes every time the tunnel restarts. Anyone with the URL can reach the login page, so keep it private and add network/auth protection before wider exposure. `cloudflared` is required (`winget install Cloudflare.cloudflared`).
 
-**Fixed frontend URL:** the static files are deployed to Firebase Hosting at **https://red-plate-pos.web.app**. `tools\build-static.ps1` embeds the current tunnel API URL from `app\live-url.txt` into `public\js\00-api-config.js`, so the short URL needs no `?api=` parameter. Re-run `tools\deploy-firebase.ps1` after each tunnel restart to refresh the embedded API URL. The local app still uses relative `api.php`.
 
 ---
 
@@ -49,7 +48,7 @@ The URL changes every time the tunnel restarts. Anyone with the URL can reach th
 |---|---|
 | `index.html` | HTML markup only |
 | `styles.css` | All CSS |
-| `js/00-core.js` … `js/99-init.js` | 15 feature modules; `99-init.js` loads last |
+| `js/00-core.js` â€¦ `js/99-init.js` | 15 feature modules; `99-init.js` loads last |
 | `api.php` | Real INSERT / UPDATE / DELETE against MySQL |
 | `database.sql` | Schema + initial users/categories |
 | `start-pos.bat` | One-click XAMPP + browser launcher |
@@ -57,7 +56,7 @@ The URL changes every time the tunnel restarts. Anyone with the URL can reach th
 
 - `save(db)` POSTs the **entire DB JSON** to `api.php?action=save`. The API synchronizes every table inside a transaction.
 - `audit_log`, `attendance`, and `schedules` are **separate tables**, so they are **not erased** when the app performs a full-state sync.
-- If MySQL goes away, changes are queued in the browser (`sipos_offline_queue_v1`) and sync automatically when the connection returns via **↻ Reload DB**.
+- If MySQL goes away, changes are queued in the browser (`sipos_offline_queue_v1`) and sync automatically when the connection returns via **â†» Reload DB**.
 
 ### API actions
 
@@ -76,12 +75,12 @@ The URL changes every time the tunnel restarts. Anyone with the URL can reach th
 
 ## 3. Import old localStorage data
 
-1. Open the **Desktop** `app\index.html` (double-click) — **not** the localhost URL. The old browser data is stored there.
+1. Open the **Desktop** `app\index.html` (double-click) â€” **not** the localhost URL. The old browser data is stored there.
 2. Log in as superadmin.
-3. Click **↑ Import local** in the topbar and confirm.
+3. Click **â†‘ Import local** in the topbar and confirm.
 4. You can now use either the Desktop file or `http://localhost/daniels-pos/index.html`.
 
-Use **↻ Reload DB** to pull the latest rows from MySQL — for example, after editing something directly in phpMyAdmin. If you insert manually, close all POS tabs before clicking Reload so the full-state sync does not overwrite your row.
+Use **â†» Reload DB** to pull the latest rows from MySQL â€” for example, after editing something directly in phpMyAdmin. If you insert manually, close all POS tabs before clicking Reload so the full-state sync does not overwrite your row.
 
 ---
 
@@ -103,18 +102,18 @@ Use **↻ Reload DB** to pull the latest rows from MySQL — for example, after 
 | `schedules` | Week 1 + Week 2 days, duty hours, grace period |
 
 **Important schema notes:**
-- `categories` has `PRIMARY KEY (kind, name)` and `sort_order INT NOT NULL DEFAULT 0` — both are required by `api.php`.
-- To add a category, choose **+ Add new category…** in the Category dropdown of the Inventory or Ingredients form.
+- `categories` has `PRIMARY KEY (kind, name)` and `sort_order INT NOT NULL DEFAULT 0` â€” both are required by `api.php`.
+- To add a category, choose **+ Add new categoryâ€¦** in the Category dropdown of the Inventory or Ingredients form.
 - In `schedules`, `days` = Week 1 and `days2` = Week 2.
 
 ---
 
 ## 5. Same ingredient, different expiry = batch
 
-The same ingredient name with different expiry dates is stored as separate batches. The Ingredients table shows a **BATCH ×N** badge.
+The same ingredient name with different expiry dates is stored as separate batches. The Ingredients table shows a **BATCH Ã—N** badge.
 
 - **Add Ingredient:** the same name is allowed if the expiry differs. If both name **and** expiry match, use **Stock In** to add quantity instead.
-- **FEFO deduction:** `first-expiry-first-out` — the batch expiring soonest is deducted first.
+- **FEFO deduction:** `first-expiry-first-out` â€” the batch expiring soonest is deducted first.
 - **Stock check:** all batches of the same ingredient are summed before deciding if stock is insufficient.
 - **Fractional stock:** values like `0.1 kg` are supported in both the Add form and Stock In.
 
@@ -124,12 +123,12 @@ The same ingredient name with different expiry dates is stored as separate batch
 
 | Role | Login | POS | Inventory / Ingredients | Delete | Reports | Users | DB tools |
 |---|---|---|---|---|---|---|---|
-| **Superadmin** | `user / <redacted>` | ✅ | ✅ add/edit/delete | ✅ | ✅ | ✅ | ✅ |
-| **Client** | `client / <redacted>` | ✅ | ✅ add/edit/delete | ✅ | ✅ | ❌ | ❌ |
-| **Cashier** | `staff / <redacted>` | ✅ | view only | ❌ | ❌ | ❌ | ❌ |
-| **Inventory** | `inventory / <redacted>` | ❌ | ✅ add/edit | ❌ | ❌ | ❌ | ❌ |
+| **Superadmin** | `user / <redacted>` | âœ… | âœ… add/edit/delete | âœ… | âœ… | âœ… | âœ… |
+| **Client** | `client / <redacted>` | âœ… | âœ… add/edit/delete | âœ… | âœ… | âŒ | âŒ |
+| **Cashier** | `staff / <redacted>` | âœ… | view only | âŒ | âŒ | âŒ | âŒ |
+| **Inventory** | `inventory / <redacted>` | âŒ | âœ… add/edit | âŒ | âŒ | âŒ | âŒ |
 
-> `staff` is a legacy alias for **Cashier**. Roles can be changed in **Users → edit → Role**.
+> `staff` is a legacy alias for **Cashier**. Roles can be changed in **Users â†’ edit â†’ Role**.
 
 ---
 
@@ -140,10 +139,10 @@ Available in the sidebar as **Activity Log** (Superadmin and Client only).
 | Field | Example |
 |---|---|
 | Who | `User (@user, Superadmin)` |
-| When | `Nov 22, 2026 · 1:45 PM` — hover for the exact `YYYY-MM-DD HH:MM:SS` |
+| When | `Nov 22, 2026 Â· 1:45 PM` â€” hover for the exact `YYYY-MM-DD HH:MM:SS` |
 | What | `ADD`, `EDIT`, `DELETE`, `STOCK`, `CATEGORY`, `VOID`, `PUNCH` |
 | Where | `item`, `ingredient`, `customer`, `user`, `recipe`, `transaction`, `category`, `schedule`, `attendance` |
-| Details | Click the 👁 button for **before / after** values |
+| Details | Click the ðŸ‘ button for **before / after** values |
 
 - Every mutation is logged automatically, including actions by Inventory and Cashier.
 - Passwords are masked (`***`).
@@ -153,7 +152,7 @@ Available in the sidebar as **Activity Log** (Superadmin and Client only).
 
 ## 8. Time In/Out (Attendance)
 
-One row per user **per day** — `UNIQUE(user_id, work_date)`.
+One row per user **per day** â€” `UNIQUE(user_id, work_date)`.
 
 **Punch sequence:**
 
@@ -168,28 +167,28 @@ Early **TIME OUT** is allowed after **TIME IN** or **LUNCH IN**.
 
 **In MySQL:** `work_date`, `time_in`, `lunch_out`, `lunch_in`, `coffee_out`, `coffee_in`, `time_out`, `status`, `updated_at`.
 
-**In the app:** actual lunch/coffee duration and **net hours** (`time_out − time_in − breaks`), with a date picker and a table of all users. Every punch is also recorded in the Activity Log (`PUNCH`).
+**In the app:** actual lunch/coffee duration and **net hours** (`time_out âˆ’ time_in âˆ’ breaks`), with a date picker and a table of all users. Every punch is also recorded in the Activity Log (`PUNCH`).
 
 ---
 
-## 9. Schedules — 2-week cycle
+## 9. Schedules â€” 2-week cycle
 
-Go to **Time In/Out → ⚙ Schedules** (Superadmin/Client only). **Only Cashier and Inventory can be scheduled.**
+Go to **Time In/Out â†’ âš™ Schedules** (Superadmin/Client only). **Only Cashier and Inventory can be scheduled.**
 
 | Field | Details |
 |---|---|
-| Week 1 | `Mon … Sun` checkboxes — **odd ISO weeks** |
-| Week 2 | `Mon … Sun` checkboxes — **even ISO weeks**; if blank, Week 1 is used |
+| Week 1 | `Mon â€¦ Sun` checkboxes â€” **odd ISO weeks** |
+| Week 2 | `Mon â€¦ Sun` checkboxes â€” **even ISO weeks**; if blank, Week 1 is used |
 | Time In / Time Out | Same for both weeks |
 | Grace period | Default `10` minutes |
 
-The current week is shown in the header: `2026-11-23 · Mon · Week 2`.
+The current week is shown in the header: `2026-11-23 Â· Mon Â· Week 2`.
 
 ### Flag logic
 
 | Flag | Meaning |
 |---|---|
-| `ON TIME` | TIME IN ≤ start + grace, with no early out |
+| `ON TIME` | TIME IN â‰¤ start + grace, with no early out |
 | `LATE Xm` | TIME IN is `X` minutes past `start + grace` |
 | `ABSENT` | Scheduled day but no TIME IN |
 | `UNDERTIME Xm` | Has TIME OUT but `X` minutes before end time |
@@ -205,7 +204,7 @@ FROM daniels_pos.schedules s
 JOIN daniels_pos.users u ON u.id = s.user_id;
 ```
 
-Every schedule change is written to the Activity Log (`EDIT` · `schedule`) with before/after values.
+Every schedule change is written to the Activity Log (`EDIT` Â· `schedule`) with before/after values.
 
 ---
 
@@ -213,10 +212,10 @@ Every schedule change is written to the Activity Log (`EDIT` · `schedule`) with
 
 | Symptom | Solution |
 |---|---|
-| `DB offline — queued` | MySQL is not running. Run `start-pos.bat` again, then click **↻ Reload DB** — queued changes sync automatically. |
+| `DB offline â€” queued` | MySQL is not running. Run `start-pos.bat` again, then click **â†» Reload DB** â€” queued changes sync automatically. |
 | `Database has no users` | Import `database.sql` in phpMyAdmin. |
 | New code not showing | **Ctrl+F5** or run `start-pos.bat` again. |
 | No schedule flags appearing | No schedule has been set yet; set one as Superadmin/Client. |
-| Manual insert in phpMyAdmin disappeared | Close POS tabs before inserting, then click **↻ Reload DB**. |
-| `No partitioning defined` | Normal informational text in phpMyAdmin — not an error. |
-| Want to reset everything | Re-import `database.sql`. If you need the old data, use **↑ Import local** from the Desktop `app\index.html`. |
+| Manual insert in phpMyAdmin disappeared | Close POS tabs before inserting, then click **â†» Reload DB**. |
+| `No partitioning defined` | Normal informational text in phpMyAdmin â€” not an error. |
+| Want to reset everything | Re-import `database.sql`. If you need the old data, use **â†‘ Import local** from the Desktop `app\index.html`. |

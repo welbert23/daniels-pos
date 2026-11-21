@@ -12,6 +12,4 @@ Thumbs.db
 .env
 *.local
 app/live-url.txt
-public/
-.firebase/
 

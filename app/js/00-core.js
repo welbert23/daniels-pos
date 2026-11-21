@@ -4,8 +4,8 @@
    ============================================================ */
 
 /* ============================================================
-   SALES & INVENTORY POS — Daniel's Barbecue & Restaurant
-   MySQL-backed, role-aware — index.html + styles.css + app.js
+   SALES & INVENTORY POS â€” Daniel's Barbecue & Restaurant
+   MySQL-backed, role-aware â€” index.html + styles.css + app.js
    ============================================================ */
 const DB_KEY='sipos_db_v2',SESSION_KEY='sipos_session_v1';
 const ROLE_LABEL={superadmin:'Superadmin',client:'Client',cashier:'Cashier',inventory:'Inventory',staff:'Cashier'};
@@ -36,7 +36,7 @@ function addCategory(kind,name){
 }
 function catOptions(kind,selected){
   const list=(kind==='item'?itemCats():ingCats()).slice(1);
-  return list.map(c=>`<option ${c===selected?'selected':''}>${esc(c)}</option>`).join('')+'<option value="__new__">+ Add new category…</option>';
+  return list.map(c=>`<option ${c===selected?'selected':''}>${esc(c)}</option>`).join('')+'<option value="__new__">+ Add new categoryâ€¦</option>';
 }
 function catChanged(kind,p,sel){
   if(sel.value==='__new__'){
@@ -62,7 +62,7 @@ function commitNewCat(kind,p){
   sel.dataset.prev=final;
   inp.value='';
   $('#'+p+'_cat_box').style.display='none';
-  toast('Category added — '+final);
+  toast('Category added â€” '+final);
 }
 function expStatus(exp){if(!exp)return null;const d=new Date(exp),t=new Date();if(exp<todayStr())return{st:'bad',lb:'EXPIRED'};const days=Math.floor((d-t)/864e5);if(days<=3)return{st:'warn',lb:'EXP SOON'};return null}
 const qty=n=>Number.isInteger(n)?n:Number(Number(n||0).toFixed(2));
@@ -81,11 +81,12 @@ function toast(msg){const t=$('#toast'),tx=$('#toastTxt');tx.textContent=msg;t.c
 const hideToast=()=>{const t=$('#toast');if(t)t.classList.remove('show');clearTimeout(_toastTimer)};
 
 /* --- storage: MySQL via api.php (every change is a real SQL write) --- */
+const IS_GH_PAGES = /\.github\.io$/i.test(location.hostname);
 const API_QUERY = new URLSearchParams(location.search).get('api');
-const API_KEY = 'sipos_api_url_' + location.origin;
-if (API_QUERY) localStorage.setItem(API_KEY, API_QUERY);
-const API = API_QUERY || window.POS_API_URL || localStorage.getItem(API_KEY)
-  || (location.protocol === 'file:' ? 'http://localhost/daniels-pos/api.php' : 'api.php');
+if (API_QUERY) localStorage.setItem('sipos_api_url', API_QUERY);
+const API = IS_GH_PAGES
+  ? (API_QUERY || localStorage.getItem('sipos_api_url') || 'api.php')
+  : (location.protocol === 'file:' ? 'http://localhost/daniels-pos/api.php' : 'api.php');
 const OFFLINE_KEY='sipos_offline_queue_v1';
 let DB=null, OFFLINE=false, _syncTimer=null, _syncing=false, _dirty=false;
 
@@ -101,12 +102,12 @@ function logAction(action,entity,entityId,summary,before,after){
   const payload={ts:new Date().toISOString(),actor_id:u.id||'',actor_name:u.name||'',actor_username:u.username||'',actor_role:u.role||'',action,entity,entity_id:String(entityId||''),summary:summary||'',before:before?JSON.stringify(before):null,after:after?JSON.stringify(after):null};
   fetch(API+'?action=audit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),keepalive:true}).catch(e=>console.error('[POS] audit log failed:',e));
 }
-function save(db){DB=db;if(OFFLINE){localStorage.setItem(OFFLINE_KEY,JSON.stringify(db));dbStatus('err','DB offline — queued');return}_dirty=true;dbStatus('pending','Saving…');clearTimeout(_syncTimer);_syncTimer=setTimeout(()=>flushDB(),100)}
+function save(db){DB=db;if(OFFLINE){localStorage.setItem(OFFLINE_KEY,JSON.stringify(db));dbStatus('err','DB offline â€” queued');return}_dirty=true;dbStatus('pending','Savingâ€¦');clearTimeout(_syncTimer);_syncTimer=setTimeout(()=>flushDB(),100)}
 async function flushDB(force){
   if(OFFLINE||!DB||_syncing||(!_dirty&&!force))return;
   _syncing=true;_dirty=false;
   const snapshot=JSON.stringify(DB);
-  dbStatus('saving','Saving…');
+  dbStatus('saving','Savingâ€¦');
   try{
     const r=await fetch(API+'?action=save',{method:'POST',headers:{'Content-Type':'application/json'},body:snapshot});
     const j=await r.json();
@@ -116,7 +117,7 @@ async function flushDB(force){
   }catch(e){
     console.error('[POS] MySQL save failed:',e);
     localStorage.setItem(OFFLINE_KEY,snapshot);
-    dbStatus('err','DB offline — queued');_dirty=true;
+    dbStatus('err','DB offline â€” queued');_dirty=true;
   }finally{_syncing=false;if(_dirty&&!OFFLINE)_syncTimer=setTimeout(()=>flushDB(),1500)}
 }
 async function pushQueued(){
@@ -145,7 +146,7 @@ async function importLocal(){
 }
 async function refreshDB(){
   if(!requireSuper())return;
-  dbStatus('saving','Refreshing…');
+  dbStatus('saving','Refreshingâ€¦');
   try{
     const r=await fetch(API+'?action=bootstrap',{cache:'no-store'});
     const j=await r.json();

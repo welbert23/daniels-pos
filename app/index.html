@@ -56,10 +56,10 @@
       </div>
       <div class="spacer"></div>
       <div id="dbTools" style="display:none;gap:8px;align-items:center">
-        <button class="dbrefresh" onclick="refreshDB()" title="Reload data from MySQL">↻ Reload DB</button>
-        <button class="dbrefresh" onclick="importLocal()" title="Push this browser's saved data into MySQL">↑ Import local</button>
-        <a class="dbrefresh" href="http://localhost/phpmyadmin/index.php?route=/database/structure&amp;db=daniels_pos" target="_blank" rel="noopener" title="Open phpMyAdmin">phpMyAdmin ↗</a>
-        <div class="dbchip saving" id="dbChip"><i></i><span>Connecting…</span></div>
+        <button class="dbrefresh" onclick="refreshDB()" title="Reload data from MySQL">â†» Reload DB</button>
+        <button class="dbrefresh" onclick="importLocal()" title="Push this browser's saved data into MySQL">â†‘ Import local</button>
+        <a class="dbrefresh" href="http://localhost/phpmyadmin/index.php?route=/database/structure&amp;db=daniels_pos" target="_blank" rel="noopener" title="Open phpMyAdmin">phpMyAdmin â†—</a>
+        <div class="dbchip saving" id="dbChip"><i></i><span>Connectingâ€¦</span></div>
       </div>
       <div class="clock" id="clock"></div>
     </div>
@@ -71,7 +71,6 @@
 <div class="overlay" id="overlay"><div class="modal" id="modalBox"></div></div>
 <div id="printArea" style="display:none"></div>
 <div class="toast" id="toast"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span id="toastTxt"></span></div>
-<script src="js/00-api-config.js?v=16"></script>
 <script src="js/00-core.js?v=16"></script>
 <script src="js/10-router-auth.js?v=16"></script>
 <script src="js/20-dashboard.js?v=16"></script>
