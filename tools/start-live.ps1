@@ -40,8 +40,8 @@ if (-not $url) {
     throw "Tunnel URL not found. Check: $log"
 }
 
-$url | Set-Content $urlFile -Encoding ASCII
 $liveUrl = "$url/daniels-pos/index.html?v=16"
+$liveUrl | Set-Content $urlFile -Encoding ASCII
 
 Write-Host ''
 Write-Host '============================================================'
