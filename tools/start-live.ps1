@@ -16,6 +16,9 @@ Start-Process 'C:\xampp\xampp_start.exe'
 Start-Sleep -Seconds 8
 
 Write-Host 'Starting Cloudflare HTTPS tunnel for /daniels-pos ...'
+Get-CimInstance Win32_Process -Filter "Name = 'cloudflared.exe'" -ErrorAction SilentlyContinue |
+    Where-Object { $_.CommandLine -match 'daniels-pos' } |
+    ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
 Remove-Item $log, "$log.err" -ErrorAction SilentlyContinue
 
 $tunnel = Start-Process `
@@ -52,7 +55,7 @@ Write-Host 'Updating GitHub Pages API config...'
 $changed = $false
 Push-Location $root
 try {
-    git add docs/js/00-api-url.js
+    git add docs/index.html docs/js/00-api-url.js
     git diff --cached --quiet
     if ($LASTEXITCODE -ne 0) { $changed = $true }
     if ($changed) {
@@ -67,10 +70,15 @@ finally {
 
 if ($changed) {
     Write-Host 'Waiting for GitHub Pages build...'
-    for ($i = 0; $i -lt 20; $i++) {
-        $line = gh api repos/welbert23/daniels-pos/pages/builds/latest --jq '.status + " " + .commit' 2>$null
-        if ($line -like "built $commit*") { break }
-        Start-Sleep -Seconds 3
+    try {
+        for ($i = 0; $i -lt 20; $i++) {
+            $build = gh api repos/welbert23/daniels-pos/pages/builds/latest 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue
+            if ($build -and $build.status -eq 'built' -and $build.commit -like "$commit*") { break }
+            Start-Sleep -Seconds 3
+        }
+    }
+    catch {
+        Write-Host "Could not confirm Pages build: $($_.Exception.Message)"
     }
 }
 
