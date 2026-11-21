@@ -1,0 +1,13 @@
+# OS / editor junk
+Thumbs.db
+.DS_Store
+*.log
+.vscode/
+.idea/
+
+# Empty leftover folder at project root (already copied to design/Penpot-UXUI)
+/Penpot-UXUI/
+
+# Local-only environment files
+.env
+*.local
