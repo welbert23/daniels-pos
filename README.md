@@ -28,6 +28,24 @@ Double-click **`app\start-pos.bat`**. It starts XAMPP (Apache + MySQL) and opens
 
 ---
 
+## Live access from other devices
+
+GitHub Pages is not available for a private repository on a free account, so the app is exposed through a **Cloudflare HTTPS tunnel** instead.
+
+1. Double-click **`app\start-live.bat`**.
+2. It starts XAMPP and a public HTTPS tunnel, then prints a URL like:
+   `https://<random>.trycloudflare.invalid/daniels-pos/index.html?v=16`
+3. Open that URL on any device (phone, tablet, another PC).
+4. The current URL is also saved to `app\live-url.txt`.
+
+The tunnel points to your local `daniels-pos` app, so **MySQL still runs on your PC**. Changes made on the server appear immediately after a page refresh or **↻ Reload DB**. The GitHub repo stays private and is only a code backup.
+
+> The tunnel URL changes every time it restarts. Anyone with the URL can reach the login page, so do not share it publicly. General access control is UI-level; add network/auth protection before exposing it widely.
+
+Requires `cloudflared` (installed via `winget install Cloudflare.cloudflared`).
+
+---
+
 ## Features
 
 - **Point of Sale** — FEFO deduction; the same ingredient with different expiry dates is treated as separate batches.
@@ -51,10 +69,11 @@ POS-System/
 │   ├── api.php             MySQL bridge (bootstrap/save/audit/attendance/schedules)
 │   ├── database.sql        schema + initial users/categories
 │   ├── start-pos.bat       XAMPP + browser launcher
+│   ├── start-live.bat      XAMPP + public HTTPS tunnel launcher
 │   └── README-DATABASE.md  detailed database docs
 ├── docs/         → PDF modules, documentation, session notes
 ├── design/       → Penpot UX/UI files, screenshots, design zips
-├── tools/        → Screenshot capture & PDF generation scripts
+├── tools/        → Screenshot/PDF scripts + start-live.ps1 tunnel launcher
 ├── archive/      → Old/unused versions (index-design2.html, index-standalone.html, app-standalone.js)
 └── README.md     → This file
 ```

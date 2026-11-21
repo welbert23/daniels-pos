@@ -26,6 +26,21 @@ All business data lives in **XAMPP MySQL** (`daniels_pos`). When you add, edit, 
 
 ---
 
+## 1b. Live access from other devices
+
+GitHub Pages cannot be used with a private repository on a free plan, so a **Cloudflare HTTPS tunnel** is used instead.
+
+1. Double-click **`start-live.bat`** (or run `tools\start-live.ps1`).
+2. It starts XAMPP and the tunnel, then prints a public URL such as:
+   `https://<random>.trycloudflare.invalid/daniels-pos/index.html?v=16`
+3. Open that URL on another device. It is also saved to `app\live-url.txt`.
+
+The tunnel points directly to the local `daniels-pos` app, so the API call is still the relative `api.php` and the database remains your local MySQL. Server-side changes show up after a refresh or **↻ Reload DB**.
+
+The URL changes every time the tunnel restarts. Anyone with the URL can reach the login page, so keep it private and add network/auth protection before wider exposure. `cloudflared` is required (`winget install Cloudflare.cloudflared`).
+
+---
+
 ## 2. How sync works
 
 | File | Role |
@@ -36,6 +51,7 @@ All business data lives in **XAMPP MySQL** (`daniels_pos`). When you add, edit, 
 | `api.php` | Real INSERT / UPDATE / DELETE against MySQL |
 | `database.sql` | Schema + initial users/categories |
 | `start-pos.bat` | One-click XAMPP + browser launcher |
+| `start-live.bat` / `tools\start-live.ps1` | One-click XAMPP + public HTTPS tunnel |
 
 - `save(db)` POSTs the **entire DB JSON** to `api.php?action=save`. The API synchronizes every table inside a transaction.
 - `audit_log`, `attendance`, and `schedules` are **separate tables**, so they are **not erased** when the app performs a full-state sync.
