@@ -37,11 +37,11 @@ The GitHub repository is **public**, and the static frontend is published with G
 GitHub Pages can only serve static files from `docs/`. PHP and MySQL cannot run there, so `api.php` stays on your PC.
 
 - **Offline mode (default):** open the Pages URL as-is. The app uses the offline queue and any data already saved in that browser. To move old browser data into MySQL, use **↑ Import local** from the Desktop `app\index.html`.
-- **Live MySQL:** double-click **`app\start-live.bat`** to start XAMPP and a Cloudflare HTTPS tunnel, then open:
+- **Live MySQL:** double-click **`app\start-live.bat`**. It starts XAMPP and a Cloudflare tunnel, writes the new API URL to `docs/js/00-api-url.js`, commits/pushes it, waits for GitHub Pages to rebuild, then opens a short URL like:
 
-  `https://welbert23.github.io/daniels-pos/?api=https://<random>.trycloudflare.invalid/daniels-pos/api.php`
+  `https://welbert23.github.io/daniels-pos/?r=a1b2c3`
 
-  The API URL is remembered in that browser (`localStorage` key `sipos_api_url`), so it only needs to be supplied once. `app\start-live.bat` now opens this Pages URL automatically, saves it to `app\live-url.txt`, and copies it to the clipboard. After every tunnel restart, run the launcher again and use the newly generated link. The direct tunnel URL is still printed in the console as a fallback.
+  The random `?r=` value only busts the browser/CDN cache. The real tunnel URL is read from the auto-updated config file, so no long `?api=` link is needed. The shareable URL is saved to `app\live-url.txt` and copied to the clipboard; the direct tunnel URL is printed in the console as a fallback. A manual `?api=<url>` still works and overrides the config for that browser.
 
 Changes go to **MySQL on your PC**, so XAMPP must be running. Refresh the page or use **↻ Reload DB** (superadmin only) to see them.
 
@@ -49,7 +49,7 @@ After changing frontend code, rebuild and publish the static site:
 
 ```
 powershell -ExecutionPolicy Bypass -File tools\build-pages.ps1
-git add pages && git commit -m "Update Pages site" && git push
+git add docs && git commit -m "Update Pages site" && git push
 ```
 
 > The tunnel URL changes on every restart. Anyone with the Pages URL can reach the login page; access control is UI-level only. Because the repository is public, change the default logins before real use and do not store secrets in the repo.

@@ -5,6 +5,7 @@ $app         = Join-Path $root 'app'
 $cloudflared = 'C:\Program Files (x86)\cloudflared\cloudflared.exe'
 $log         = Join-Path $env:TEMP 'pos-cloudflared.log'
 $urlFile     = Join-Path $app 'live-url.txt'
+$apiFile     = Join-Path $app 'api-url.txt'
 
 if (-not (Test-Path $cloudflared)) {
     throw "Cloudflare Tunnel not found at: $cloudflared"
@@ -41,19 +42,51 @@ if (-not $url) {
 }
 
 $apiUrl       = "$url/daniels-pos/api.php"
-$pagesUrl     = "https://welbert23.github.io/daniels-pos/?api=" + [uri]::EscapeDataString($apiUrl)
 $tunnelAppUrl = "$url/daniels-pos/index.html?v=17"
 
+$apiUrl | Set-Content $apiFile -Encoding ASCII
+
+Write-Host 'Updating GitHub Pages API config...'
+& (Join-Path $root 'tools\build-pages.ps1')
+
+$changed = $false
+Push-Location $root
+try {
+    git add docs/js/00-api-url.js
+    git diff --cached --quiet
+    if ($LASTEXITCODE -ne 0) { $changed = $true }
+    if ($changed) {
+        git commit -m "chore: update live API URL"
+        git push origin main
+    }
+    $commit = (git rev-parse --short HEAD)
+}
+finally {
+    Pop-Location
+}
+
+if ($changed) {
+    Write-Host 'Waiting for GitHub Pages build...'
+    for ($i = 0; $i -lt 20; $i++) {
+        $line = gh api repos/welbert23/daniels-pos/pages/builds/latest --jq '.status + " " + .commit' 2>$null
+        if ($line -like "built $commit*") { break }
+        Start-Sleep -Seconds 3
+    }
+}
+
+$token    = [guid]::NewGuid().ToString('N').Substring(0, 6)
+$pagesUrl = "https://welbert23.github.io/daniels-pos/?r=$token"
 $pagesUrl | Set-Content $urlFile -Encoding ASCII
 
 Write-Host ''
 Write-Host '============================================================'
-Write-Host " PAGES URL : $pagesUrl"
-Write-Host " DIRECT    : $tunnelAppUrl"
+Write-Host " LIVE URL : $pagesUrl"
+Write-Host " API      : $apiUrl"
+Write-Host " DIRECT   : $tunnelAppUrl"
 Write-Host " Saved to : $urlFile"
 Write-Host '============================================================'
 Write-Host ''
-Write-Host 'Open/share the PAGES URL - it uses your local MySQL.'
+Write-Host 'The LIVE URL is the one to open/share. It uses your local MySQL.'
 Write-Host 'It changes on every tunnel restart because the API URL changes.'
 Write-Host 'Press Ctrl+C to stop the launcher (the tunnel keeps running).'
 
