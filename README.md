@@ -30,19 +30,31 @@ Double-click **`app\start-pos.bat`**. It starts XAMPP (Apache + MySQL) and opens
 
 ## Live access from other devices
 
-GitHub Pages is not available for a private repository on a free account, so the app is exposed through a **Cloudflare HTTPS tunnel** instead.
+The GitHub repository is **public**, and the static frontend is published with GitHub Pages at:
 
-1. Double-click **`app\start-live.bat`**.
-2. It starts XAMPP and a public HTTPS tunnel, then prints a URL like:
-   `https://<random>.trycloudflare.invalid/daniels-pos/index.html?v=16`
-3. Open that URL on any device (phone, tablet, another PC).
-4. The current URL is also saved to `app\live-url.txt`.
+**https://welbert23.github.io/daniels-pos/**
 
-The tunnel points to your local `daniels-pos` app, so **MySQL still runs on your PC**. Changes made on the server appear immediately after a page refresh or **↻ Reload DB**. The GitHub repo stays private and is only a code backup.
+GitHub Pages can only serve static files (`pages/`). PHP and MySQL cannot run there, so `api.php` stays on your PC.
 
-> The tunnel URL changes every time it restarts. Anyone with the URL can reach the login page, so do not share it publicly. General access control is UI-level; add network/auth protection before exposing it widely.
+- **Offline mode (default):** open the Pages URL as-is. The app uses the offline queue and any data already saved in that browser. To move old browser data into MySQL, use **↑ Import local** from the Desktop `app\index.html`.
+- **Live MySQL:** double-click **`app\start-live.bat`** to start XAMPP and a Cloudflare HTTPS tunnel, then open:
 
-Requires `cloudflared` (installed via `winget install Cloudflare.cloudflared`).
+  `https://welbert23.github.io/daniels-pos/?api=https://<random>.trycloudflare.invalid/daniels-pos/api.php`
+
+  The API URL is remembered in that browser (`localStorage` key `sipos_api_url`), so it only needs to be supplied once. After every tunnel restart, open the URL with the new `?api=` value once to update it. The current tunnel URL is also saved to `app\live-url.txt` and copied to the clipboard.
+
+Changes go to **MySQL on your PC**, so XAMPP must be running. Refresh the page or use **↻ Reload DB** (superadmin only) to see them.
+
+After changing frontend code, rebuild and publish the static site:
+
+```
+powershell -ExecutionPolicy Bypass -File tools\build-pages.ps1
+git add pages && git commit -m "Update Pages site" && git push
+```
+
+> The tunnel URL changes on every restart. Anyone with the Pages URL can reach the login page; access control is UI-level only. Because the repository is public, change the default logins before real use and do not store secrets in the repo.
+
+Requires `cloudflared` (installed via `winget install Cloudflare.cloudflared`) only for live MySQL access.
 
 ## Features
 
@@ -70,8 +82,9 @@ POS-System/
 │   ├── start-live.bat      XAMPP + public HTTPS tunnel launcher
 │   └── README-DATABASE.md  detailed database docs
 ├── docs/         → PDF modules, documentation, session notes
+├── pages/        → Generated static site served by GitHub Pages (no PHP/MySQL)
 ├── design/       → Penpot UX/UI files, screenshots, design zips
-├── tools/        → Screenshot/PDF scripts + start-live.ps1 tunnel launcher
+├── tools/        → Screenshot/PDF scripts, start-live.ps1, build-pages.ps1
 ├── archive/      → Old/unused versions (index-design2.html, index-standalone.html, app-standalone.js)
 └── README.md     → This file
 ```

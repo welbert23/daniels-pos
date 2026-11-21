@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daniel's Barbecue &amp; Restaurant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=16">
+</head>
+<body>
+
+<!-- ==================== LOGIN ==================== -->
+<div id="login">
+  <div class="login-bg">
+    <div class="bg-bar">DANIEL'S BARBECUE &amp; RESTAURANT &nbsp;&middot;&nbsp; CABITEHAN ROAD, CABUYAO, LAGUNA &nbsp;&middot;&nbsp; HOT &amp; FRESH DAILY</div>
+    <div class="bg-square"></div>
+    <div class="bg-ring"></div>
+    <div class="bg-dot"></div>
+    <div class="bg-stamp">DB</div>
+  </div>
+  <div class="login-card">
+    <div class="login-logo"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" fill="#14110A"/><path d="M8 8h8M8 12h8M8 16h5" fill="none" stroke="#FFD400" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <h1>Daniel's<br>Barbecue &amp; Restaurant</h1>
+    <p class="sub">FAST-FOOD&nbsp;POS&nbsp;+&nbsp;INVENTORY</p>
+    <div class="login-err" id="loginErr">Invalid username or password.</div>
+    <div class="field"><label>Username</label><input id="logUser" autocomplete="username"></div>
+    <div class="field"><label>Password</label><input id="logPass" type="password" autocomplete="current-password"></div>
+    <button class="btn" onclick="doLogin()">Sign in</button>
+  </div>
+</div>
+
+<!-- ==================== APP ==================== -->
+<div id="app">
+  <aside class="sidebar">
+    <div class="side-logo">
+      <div class="mark"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" fill="#14110A"/><path d="M8 8h8M8 12h8M8 16h5" fill="none" stroke="#FFD400" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <div class="text"><b>Daniel's</b><small>Barbecue &amp; Restaurant</small></div>
+    </div>
+    <div class="side-nav">
+      <div class="side-nav-label">Main Menu</div>
+      <div id="nav"></div>
+    </div>
+    <div class="side-user">
+      <div class="av" id="userAvatar">W</div>
+      <div class="meta"><b id="userName">-</b><small id="userRole">-</small></div>
+      <button class="out" onclick="doLogout()">LOG&nbsp;OUT</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="pageTitle">Dashboard</h2>
+      </div>
+      <div class="spacer"></div>
+      <div id="dbTools" style="display:none;gap:8px;align-items:center">
+        <button class="dbrefresh" onclick="refreshDB()" title="Reload data from MySQL">↻ Reload DB</button>
+        <button class="dbrefresh" onclick="importLocal()" title="Push this browser's saved data into MySQL">↑ Import local</button>
+        <a class="dbrefresh" href="http://localhost/phpmyadmin/index.php?route=/database/structure&amp;db=daniels_pos" target="_blank" rel="noopener" title="Open phpMyAdmin">phpMyAdmin ↗</a>
+        <div class="dbchip saving" id="dbChip"><i></i><span>Connecting…</span></div>
+      </div>
+      <div class="clock" id="clock"></div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<!-- ==================== MODALS ==================== -->
+<div class="overlay" id="overlay"><div class="modal" id="modalBox"></div></div>
+<div id="printArea" style="display:none"></div>
+<div class="toast" id="toast"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span id="toastTxt"></span></div>
+<script src="js/00-core.js?v=16"></script>
+<script src="js/10-router-auth.js?v=16"></script>
+<script src="js/20-dashboard.js?v=16"></script>
+<script src="js/30-pos.js?v=16"></script>
+<script src="js/40-inventory.js?v=16"></script>
+<script src="js/45-recipes.js?v=16"></script>
+<script src="js/50-ingredients.js?v=16"></script>
+<script src="js/60-sales.js?v=16"></script>
+<script src="js/70-customers.js?v=16"></script>
+<script src="js/80-attendance.js?v=16"></script>
+<script src="js/85-logs.js?v=16"></script>
+<script src="js/90-reports.js?v=16"></script>
+<script src="js/95-users.js?v=16"></script>
+<script src="js/96-modal.js?v=16"></script>
+<script src="js/99-init.js?v=16"></script>
+</body>
+</html>
