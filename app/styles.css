@@ -374,3 +374,9 @@ tr:hover td{background:var(--brand-l)}
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast svg{width:18px;height:18px;stroke:var(--brand);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* FIT AT 100% ZOOM */
+.topbar>div:first-child{min-width:0;overflow:hidden}
+.topbar h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:1200px){.topbar{padding:10px 16px;gap:10px}.topbar .clock em{display:none}.dbchip{font-size:8.5px;padding:4px 6px}}
+@media(max-width:900px){.sidebar{width:200px}.main{margin-left:200px}.content{padding:16px 12px 26px}.topbar{padding:9px 12px;gap:8px}.topbar .clock{display:none}.dbchip{font-size:8px;padding:3px 5px;letter-spacing:0}.dbrefresh{font-size:8px;padding:3px 5px}.tbl-compact th,.tbl-compact td{padding:4px 4px;font-size:9.5px}.tbl-compact .icon-btn{width:24px;height:24px}.tbl-compact .icon-btn svg{width:11px;height:11px}.tbl-compact .act{gap:3px}.tbl-wide th{padding:3px 2px;font-size:7px}.tbl-wide td{padding:3px 2px;font-size:9px;max-width:84px}.tbl-wide td:first-child{max-width:100px}.tbl-wide .pill{font-size:6.5px;padding:1px 2px}}
