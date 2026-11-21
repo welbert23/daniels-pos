@@ -1,42 +1,42 @@
 # Daniel's Barbecue & Restaurant — POS System
 
-MySQL-backed POS, inventory, ingredients, attendance, schedules, at audit trail. Ang database ang source of truth — walang hardcoded business data sa frontend.
+MySQL-backed POS, inventory, ingredients, attendance, schedules, and audit trail. The database is the source of truth — there is no hardcoded business data in the frontend.
 
 ---
 
-## Mabilis simulan
+## Quick start
 
-I-double-click ang **`app\start-pos.bat`**. Sisimulan nito ang XAMPP (Apache + MySQL) at bubuksan ang POS.
+Double-click **`app\start-pos.bat`**. It starts XAMPP (Apache + MySQL) and opens the POS in your browser.
 
 | Item | Address |
 |---|---|
 | App | `http://localhost/daniels-pos/index.html` |
 | phpMyAdmin | `http://localhost/phpmyadmin/index.php?route=/database/structure&db=daniels_pos` |
 
-> Ang launcher ay nagdadagdag ng cache-buster (`?v=16`). Kung luma nang tab ang gamit mo, pindutin ang **Ctrl+F5**.
+> The launcher adds a cache-buster (`?v=16`). If you have an old tab open, press **Ctrl+F5**.
 
 ### Logins
 
 | Role | Username / Password | Access |
 |---|---|---|
-| **Superadmin** | `user / <redacted>` | Lahat, kasama **Users** at DB tools |
-| **Client** | `client / <redacted>` | POS, inventory, ingredients, customers, sales, reports, schedules — **walang** Users / DB tools |
+| **Superadmin** | `user / <redacted>` | Everything, including **Users** and DB tools |
+| **Client** | `client / <redacted>` | POS, inventory, ingredients, customers, sales, reports, schedules — **no** Users / DB tools |
 | **Cashier** | `staff / <redacted>` | POS only; view-only inventory/ingredients/time in-out |
-| **Inventory** | `inventory / <redacted>` | Add/edit inventory & ingredients, **walang delete**, walang POS |
+| **Inventory** | `inventory / <redacted>` | Add/edit inventory & ingredients, **no delete**, no POS |
 
-> Ang `staff` ay itinuturing ding **Cashier** (legacy alias).
+> `staff` is treated as **Cashier** (legacy alias).
 
 ---
 
-## Mga feature
+## Features
 
-- **Point of Sale** — FEFO deduction; magkaibang expiry = magkaibang batch.
-- **Inventory & Ingredients** — dynamic categories; pwede mag-add ng bagong category sa loob mismo ng dropdown.
-- **Attendance** — `TIME IN → LUNCH OUT → LUNCH IN → COFFEE OUT → COFFEE IN → TIME OUT`. Pinapayagan ang maagang TIME OUT pagkatapos ng TIME IN o LUNCH IN.
-- **Schedules** — 2-week cycle: **Week 1 = odd ISO weeks**, **Week 2 = even ISO weeks**. Superadmin/Client lang ang nagseset; Cashier/Inventory lang ang sine-set. Makikita ang kasalukuyang week sa header ng Time In/Out.
+- **Point of Sale** — FEFO deduction; the same ingredient with different expiry dates is treated as separate batches.
+- **Inventory & Ingredients** — dynamic categories; new categories can be added directly from the Category dropdown.
+- **Attendance** — `TIME IN → LUNCH OUT → LUNCH IN → COFFEE OUT → COFFEE IN → TIME OUT`. Early TIME OUT is allowed after TIME IN or LUNCH IN.
+- **Schedules** — 2-week cycle: **Week 1 = odd ISO weeks**, **Week 2 = even ISO weeks**. Only Superadmin/Client can set them; only Cashier/Inventory can be scheduled. The current week is shown in the Time In/Out header.
 - **Attendance flags** — `ON TIME`, `LATE Xm`, `ABSENT`, `UNDERTIME Xm`, `DAY OFF`, `NO SCHEDULE`.
-- **Activity Log** — sino, kailan, anong action, at before/after values; readable date/time; naka-mask ang password.
-- **DB tools** — `↻ Reload DB`, `↑ Import local`, `phpMyAdmin ↗`, at status chip — **superadmin lang** ang nakakakita.
+- **Activity Log** — who, when, what action, and before/after values; readable date/time; passwords are masked.
+- **DB tools** — `↻ Reload DB`, `↑ Import local`, `phpMyAdmin ↗`, and the status chip — **superadmin only**.
 
 ---
 
@@ -46,22 +46,22 @@ I-double-click ang **`app\start-pos.bat`**. Sisimulan nito ang XAMPP (Apache + M
 POS-System/
 ├── app/          → RUNNABLE POS
 │   ├── index.html          markup
-│   ├── styles.css          lahat ng CSS
-│   ├── js/                 15 feature modules (tingnan sa ibaba)
+│   ├── styles.css          all CSS
+│   ├── js/                 15 feature modules (see below)
 │   ├── api.php             MySQL bridge (bootstrap/save/audit/attendance/schedules)
 │   ├── database.sql        schema + initial users/categories
 │   ├── start-pos.bat       XAMPP + browser launcher
-│   └── README-DATABASE.md  detalyadong DB docs
+│   └── README-DATABASE.md  detailed database docs
 ├── docs/         → PDF modules, documentation, session notes
 ├── design/       → Penpot UX/UI files, screenshots, design zips
 ├── tools/        → Screenshot capture & PDF generation scripts
 ├── archive/      → Old/unused versions (index-design2.html, index-standalone.html, app-standalone.js)
-└── README.md     → Itong file
+└── README.md     → This file
 ```
 
 ### JavaScript modules (`app/js/`)
 
-| File | Laman |
+| File | Purpose |
 |---|---|
 | `00-core.js` | Constants, helpers, categories, MySQL sync, audit, migration |
 | `10-router-auth.js` | Navigation, login/logout |
@@ -77,13 +77,13 @@ POS-System/
 | `90-reports.js` | Reports |
 | `95-users.js` | User management |
 | `96-modal.js` | Modal helpers |
-| `99-init.js` | Bootstrap / init (last na loload) |
+| `99-init.js` | Bootstrap / init (loaded last) |
 
 ---
 
-## Saan naka-save ang data
+## Where data is stored
 
-Hindi ito nasa folder — nasa **XAMPP MySQL** mismo:
+Data lives in **XAMPP MySQL**, not in the project folder:
 
 | Item | Value |
 |---|---|
@@ -91,48 +91,48 @@ Hindi ito nasa folder — nasa **XAMPP MySQL** mismo:
 | MySQL user | `root` (blank password) |
 | Physical files | `C:\xampp\mysql\data\daniels_pos\` |
 | Web root (junction) | `C:\xampp\htdocs\daniels-pos` → `...\POS-System\app` |
-| Viewer | **phpMyAdmin ↗** button sa topbar (superadmin) |
+| Viewer | **phpMyAdmin ↗** button in the POS topbar (superadmin) |
 
-**Mga tables:** `meta`, `users`, `categories`, `items`, `item_recipes`, `ingredients`, `customers`, `transactions`, `transaction_items`, `attendance`, `schedules`, `audit_log`.
+Tables: `meta`, `users`, `categories`, `items`, `item_recipes`, `ingredients`, `customers`, `transactions`, `transaction_items`, `attendance`, `schedules`, `audit_log`.
 
-Ang initial users at categories ay nasa `app\database.sql`. Ang lahat ng items, recipes, ingredients, customers, at transactions ay nasa MySQL lang.
+Initial users and categories are defined in `app\database.sql`. All items, recipes, ingredients, customers, and transactions live in MySQL.
 
 ---
 
-## Karaniwang gawain
+## Common tasks
 
-### I-import ang dating localStorage data
-1. Buksan ang **Desktop** `app\index.html` (hindi ang localhost) para ma-access ang lumang browser data.
-2. Mag-login bilang superadmin.
-3. I-click ang **↑ Import local** sa topbar.
+### Import old localStorage data
+1. Open the **Desktop** `app\index.html` (not the localhost URL) so the old browser data is accessible.
+2. Log in as superadmin.
+3. Click **↑ Import local** in the topbar and confirm.
 
-### Mag-set ng schedule
+### Set a schedule
 1. Superadmin/Client → **Time In/Out → ⚙ Schedules**.
-2. Pumili ng Cashier o Inventory.
-3. Piliin ang araw para sa **Week 1** at **Week 2**, time in/out, at grace period.
-4. Kung walang pipiliin sa Week 2, Week 1 ang gagamitin.
+2. Choose a Cashier or Inventory user.
+3. Select days for **Week 1** and **Week 2**, plus time in/out and grace period.
+4. If Week 2 is left empty, Week 1 is used.
 
-### Magdagdag ng category
-Sa Inventory o Ingredients form, piliin ang **+ Add new category…** sa dropdown, then i-type ang pangalan.
+### Add a category
+In the Inventory or Ingredients form, choose **+ Add new category…** from the dropdown, then type the name.
 
-### Manual insert sa phpMyAdmin
-Isara muna ang POS tabs, mag-Insert sa phpMyAdmin, tapos mag-login ulit bilang superadmin at i-click ang **↻ Reload DB** — para hindi ma-overwrite ng full-state sync.
+### Manual insert in phpMyAdmin
+Close all POS tabs first, insert the row in phpMyAdmin, then log in as superadmin and click **↻ Reload DB** so the full-state sync does not overwrite it.
 
 ---
 
 ## Troubleshooting
 
-| Sintomas | Solusyon |
+| Symptom | Solution |
 |---|---|
-| Luma ang itsura / hindi lumalabas ang bagong code | **Ctrl+F5** o i-run ulit ang `start-pos.bat` |
-| `DB offline — queued` | Hindi tumatakbo ang MySQL. I-run ulit ang `start-pos.bat`, tapos i-click ang **↻ Reload DB** — auto-sync ang queue. |
-| `Database walang users` | I-import ang `app\database.sql` sa phpMyAdmin. |
-| Walang lumalabas na schedule flag | Wala pang naka-set na schedule; mag-set muna bilang Superadmin/Client. |
-| `No partitioning defined` sa phpMyAdmin | Normal informational text — hindi error. |
-| Hindi mabura ang lumang `Penpot-UXUI` folder | Hintayin ang PC restart; naka-copy na ito sa `design\Penpot-UXUI` at naka-hide ang old folder. |
+| Stale UI / new code not showing | **Ctrl+F5** or run `start-pos.bat` again |
+| `DB offline — queued` | MySQL is not running. Run `start-pos.bat` again, then click **↻ Reload DB** — queued changes sync automatically. |
+| `Database has no users` | Import `app\database.sql` in phpMyAdmin. |
+| No schedule flags appearing | No schedule has been set yet; set one as Superadmin/Client. |
+| `No partitioning defined` in phpMyAdmin | Normal informational text — not an error. |
+| Old `Penpot-UXUI` folder cannot be deleted | Wait for a PC restart. Its contents were already copied to `design\Penpot-UXUI` and the old folder is hidden. |
 
 ---
 
-## Detalyadong docs
+## Detailed docs
 
-Basahin ang **`app\README-DATABASE.md`** para sa schema, SQL queries, import flow, roles, attendance, schedules, audit, at mas malalim na troubleshooting.
+See **`app\README-DATABASE.md`** for schema, SQL queries, import flow, roles, attendance, schedules, audit, and deeper troubleshooting.

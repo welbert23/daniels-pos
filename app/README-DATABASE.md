@@ -1,16 +1,16 @@
 # Daniel's POS — MySQL Database Edition
 
-Lahat ng business data ay nasa **XAMPP MySQL** (`daniels_pos`). Kapag nag-add/edit/delete ka sa app, makikita agad ang pagbabago sa **phpMyAdmin**.
+All business data lives in **XAMPP MySQL** (`daniels_pos`). When you add, edit, or delete something in the app, the change is immediately visible in **phpMyAdmin**.
 
-> **Walang hardcoded business data sa frontend.** Ang users, categories, items, recipes, ingredients, customers, at transactions ay galing sa MySQL. Ang initial users/categories ay nasa `database.sql`; ang lumang localStorage data ay **explicit lang** na ine-import gamit ang **↑ Import local**.
+> There is no hardcoded business data in the frontend. Users, categories, items, recipes, ingredients, customers, and transactions all come from MySQL. Initial users/categories are defined in `database.sql`; old localStorage data is imported **explicitly** with **↑ Import local**.
 
 ---
 
-## 1. Paano simulan at kung saan makikita ang DB
+## 1. Start and database access
 
-1. I-double-click ang `start-pos.bat` — sisimulan nito ang XAMPP Apache + MySQL at bubuksan ang app.
-2. Mag-login bilang **superadmin**.
-3. I-click ang **phpMyAdmin ↗** sa topbar, o buksan ang:
+1. Double-click `start-pos.bat` — it starts XAMPP Apache + MySQL and opens the app.
+2. Log in as **superadmin**.
+3. Click **phpMyAdmin ↗** in the topbar, or open:
    `http://localhost/phpmyadmin/index.php?route=/database/structure&db=daniels_pos`
 
 | Item | Value |
@@ -20,89 +20,89 @@ Lahat ng business data ay nasa **XAMPP MySQL** (`daniels_pos`). Kapag nag-add/ed
 | User | `root` |
 | Password | *(blank)* |
 | Physical files | `C:\xampp\mysql\data\daniels_pos\` |
-| Web root | `C:\xampp\htdocs\daniels-pos` → junction papunta sa **`app`** folder |
+| Web root | `C:\xampp\htdocs\daniels-pos` → junction to the **`app`** folder |
 
-> **Superadmin lang** ang nakakakita sa DB controls: **↻ Reload DB**, **↑ Import local**, **phpMyAdmin ↗**, at status chip. Nakatago ito sa Client, Cashier, at Inventory; `refreshDB()` / `importLocal()` ay may `requireSuper()` guard kahit tawagin sa console.
+> **Superadmin only** can see the DB controls: **↻ Reload DB**, **↑ Import local**, **phpMyAdmin ↗**, and the status chip. They are hidden from Client, Cashier, and Inventory; `refreshDB()` / `importLocal()` also have a `requireSuper()` guard even if called from the console.
 
 ---
 
-## 2. Paano gumagana ang sync
+## 2. How sync works
 
-| File | Papel |
+| File | Role |
 |---|---|
-| `index.html` | HTML markup lang |
-| `styles.css` | Buong CSS |
-| `js/00-core.js` … `js/99-init.js` | 15 feature modules; `99-init.js` ang huling loload |
-| `api.php` | Tunay na INSERT / UPDATE / DELETE sa MySQL |
+| `index.html` | HTML markup only |
+| `styles.css` | All CSS |
+| `js/00-core.js` … `js/99-init.js` | 15 feature modules; `99-init.js` loads last |
+| `api.php` | Real INSERT / UPDATE / DELETE against MySQL |
 | `database.sql` | Schema + initial users/categories |
 | `start-pos.bat` | One-click XAMPP + browser launcher |
 
-- Ang `save(db)` ay nagpo-POST ng **buong DB JSON** sa `api.php?action=save`. Doon ginagawa ang sync sa bawat table sa loob ng transaction.
-- `audit_log`, `attendance`, at `schedules` ay **hiwalay na tables**, kaya **hindi nabubura** kapag nag-full-state sync ang app.
-- Kung mawala ang MySQL, naka-queue ang changes sa browser (`sipos_offline_queue_v1`) at auto-sync pag bumalik ang koneksyon gamit ang **↻ Reload DB**.
+- `save(db)` POSTs the **entire DB JSON** to `api.php?action=save`. The API synchronizes every table inside a transaction.
+- `audit_log`, `attendance`, and `schedules` are **separate tables**, so they are **not erased** when the app performs a full-state sync.
+- If MySQL goes away, changes are queued in the browser (`sipos_offline_queue_v1`) and sync automatically when the connection returns via **↻ Reload DB**.
 
 ### API actions
 
-| Action | Gamit |
+| Action | Purpose |
 |---|---|
-| `bootstrap` | Kunin ang buong DB state + `empty` flag |
-| `save` | I-sync ang buong DB JSON sa mga tables |
-| `audit` | Isulat ang isang audit row |
-| `logs` | Kunin ang Activity Log |
-| `attendance` / `punch` | Kunin at i-record ang time in/out |
-| `schedules` / `schedule-save` | Kunin at i-save ang schedule |
+| `bootstrap` | Fetch the full DB state plus an `empty` flag |
+| `save` | Sync the full DB JSON into the tables |
+| `audit` | Write one audit row |
+| `logs` | Fetch the Activity Log |
+| `attendance` / `punch` | Fetch and record time in/out |
+| `schedules` / `schedule-save` | Fetch and save schedules |
 
-> Access control ay **UI-level** para sa pangkalahatang CRUD. Ang `schedule-save` lang ang may server-side role guard: **Cashier / Inventory lang ang sine-set**.
-
----
-
-## 3. Import ng dating localStorage data
-
-1. Buksan ang **Desktop** `app\index.html` (double-click) — **hindi** ang localhost URL. Dito naka-save ang lumang browser data.
-2. Mag-login bilang superadmin.
-3. I-click ang **↑ Import local** sa topbar, then i-confirm.
-4. Pwede ka na ngayong gumamit ng Desktop file o `http://localhost/daniels-pos/index.html`.
-
-Gamitin ang **↻ Reload DB** para kunin ang pinakabagong rows mula sa MySQL — halimbawa pag nag-edit ka diretso sa phpMyAdmin. Kung may manual insert, isara muna ang POS tabs bago mag-Reload para hindi ma-overwrite ng full-state sync.
+> Access control for general CRUD is **UI-level**. Only `schedule-save` has a server-side role guard: **only Cashier / Inventory can be scheduled**.
 
 ---
 
-## 4. Mga tables
+## 3. Import old localStorage data
 
-| Table | Laman |
+1. Open the **Desktop** `app\index.html` (double-click) — **not** the localhost URL. The old browser data is stored there.
+2. Log in as superadmin.
+3. Click **↑ Import local** in the topbar and confirm.
+4. You can now use either the Desktop file or `http://localhost/daniels-pos/index.html`.
+
+Use **↻ Reload DB** to pull the latest rows from MySQL — for example, after editing something directly in phpMyAdmin. If you insert manually, close all POS tabs before clicking Reload so the full-state sync does not overwrite your row.
+
+---
+
+## 4. Tables
+
+| Table | Contents |
 |---|---|
 | `users` | Accounts, username, password, name, role |
-| `items` | Menu / inventory items (presyo, cost, stock, expiry) |
-| `item_recipes` | Mga ingredients bawat menu item |
+| `items` | Menu / inventory items (price, cost, stock, expiry) |
+| `item_recipes` | Ingredients per menu item |
 | `ingredients` | Raw ingredients (stock, minimum, expiry) |
 | `customers` | Customer records |
 | `transactions` | Sales header |
-| `transaction_items` | Mga linya ng bawat sale |
+| `transaction_items` | Line items for each sale |
 | `categories` | Custom item & ingredient categories |
-| `meta` | Reference-number counter at seed version |
+| `meta` | Reference-number counter and seed version |
 | `audit_log` | Who / when / action / before-after footprint |
-| `attendance` | Time in/out, lunch, coffee bawat user per araw |
+| `attendance` | Time in/out, lunch, and coffee per user per day |
 | `schedules` | Week 1 + Week 2 days, duty hours, grace period |
 
 **Important schema notes:**
-- `categories` ay may `PRIMARY KEY (kind, name)` at `sort_order INT NOT NULL DEFAULT 0` — kailangan ito ng `api.php`.
-- Add ng category: piliin ang **+ Add new category…** sa loob ng Category dropdown ng Inventory o Ingredients form.
-- Ang `days` = Week 1, `days2` = Week 2 sa `schedules`.
+- `categories` has `PRIMARY KEY (kind, name)` and `sort_order INT NOT NULL DEFAULT 0` — both are required by `api.php`.
+- To add a category, choose **+ Add new category…** in the Category dropdown of the Inventory or Ingredients form.
+- In `schedules`, `days` = Week 1 and `days2` = Week 2.
 
 ---
 
-## 5. Same ingredient, ibang expiry = batch
+## 5. Same ingredient, different expiry = batch
 
-Pwede magkaroon ng maraming row na pareho ang pangalan pero iba ang expiry — magkahiwalay na batch. May **BATCH ×N** badge sa Ingredients table.
+The same ingredient name with different expiry dates is stored as separate batches. The Ingredients table shows a **BATCH ×N** badge.
 
-- **Add Ingredient:** pinapayagan ang parehong pangalan kung iba ang expiry. Kung parehong pangalan **at** expiry, gamitin ang **Stock In** para magdagdag ng quantity.
-- **FEFO deduction:** `first-expiry-first-out` — uunahin ang batch na pinakamalapit mag-expire.
-- **Stock check:** sinusuma ang lahat ng batch bago magpasya kung “Not enough”.
-- **Fractional stock:** sinusuportahan ang `0.1 kg` sa Add form at Stock In.
+- **Add Ingredient:** the same name is allowed if the expiry differs. If both name **and** expiry match, use **Stock In** to add quantity instead.
+- **FEFO deduction:** `first-expiry-first-out` — the batch expiring soonest is deducted first.
+- **Stock check:** all batches of the same ingredient are summed before deciding if stock is insufficient.
+- **Fractional stock:** values like `0.1 kg` are supported in both the Add form and Stock In.
 
 ---
 
-## 6. Mga role at access
+## 6. Roles and access
 
 | Role | Login | POS | Inventory / Ingredients | Delete | Reports | Users | DB tools |
 |---|---|---|---|---|---|---|---|
@@ -111,33 +111,33 @@ Pwede magkaroon ng maraming row na pareho ang pangalan pero iba ang expiry — m
 | **Cashier** | `staff / <redacted>` | ✅ | view only | ❌ | ❌ | ❌ | ❌ |
 | **Inventory** | `inventory / <redacted>` | ❌ | ✅ add/edit | ❌ | ❌ | ❌ | ❌ |
 
-> Ang `staff` ay legacy alias ng **Cashier**. Pwede palitan ang role sa **Users → edit → Role**.
+> `staff` is a legacy alias for **Cashier**. Roles can be changed in **Users → edit → Role**.
 
 ---
 
 ## 7. Activity Log (audit trail)
 
-Makikita sa sidebar ang **Activity Log** (Superadmin at Client lang).
+Available in the sidebar as **Activity Log** (Superadmin and Client only).
 
-| Field | Halimbawa |
+| Field | Example |
 |---|---|
-| Sino | `User (@user, Superadmin)` |
-| Kailan | `Nov 22, 2026 · 1:45 PM` — i-hover para sa exact `YYYY-MM-DD HH:MM:SS` |
-| Ano | `ADD`, `EDIT`, `DELETE`, `STOCK`, `CATEGORY`, `VOID`, `PUNCH` |
-| Saan | `item`, `ingredient`, `customer`, `user`, `recipe`, `transaction`, `category`, `schedule`, `attendance` |
-| Details | 👁 button para sa **before / after** values |
+| Who | `User (@user, Superadmin)` |
+| When | `Nov 22, 2026 · 1:45 PM` — hover for the exact `YYYY-MM-DD HH:MM:SS` |
+| What | `ADD`, `EDIT`, `DELETE`, `STOCK`, `CATEGORY`, `VOID`, `PUNCH` |
+| Where | `item`, `ingredient`, `customer`, `user`, `recipe`, `transaction`, `category`, `schedule`, `attendance` |
+| Details | Click the 👁 button for **before / after** values |
 
-- Auto-logged ang lahat ng mutation, kahit galing sa Inventory o Cashier.
-- Naka-mask ang password (`***`).
-- Pwede mag-filter ayon sa action o mag-search ng user/module.
+- Every mutation is logged automatically, including actions by Inventory and Cashier.
+- Passwords are masked (`***`).
+- You can filter by action or search by user/module.
 
 ---
 
 ## 8. Time In/Out (Attendance)
 
-Isang row ang bawat user **bawat araw** — `UNIQUE(user_id, work_date)`.
+One row per user **per day** — `UNIQUE(user_id, work_date)`.
 
-**Pagkakasunod-sunod:**
+**Punch sequence:**
 
 1. **TIME IN**
 2. **LUNCH OUT**
@@ -146,37 +146,37 @@ Isang row ang bawat user **bawat araw** — `UNIQUE(user_id, work_date)`.
 5. **COFFEE IN**
 6. **TIME OUT**
 
-Pinapayagan ang maagang **TIME OUT** pagkatapos ng **TIME IN** o **LUNCH IN**.
+Early **TIME OUT** is allowed after **TIME IN** or **LUNCH IN**.
 
-**Sa MySQL:** `work_date`, `time_in`, `lunch_out`, `lunch_in`, `coffee_out`, `coffee_in`, `time_out`, `status`, `updated_at`.
+**In MySQL:** `work_date`, `time_in`, `lunch_out`, `lunch_in`, `coffee_out`, `coffee_in`, `time_out`, `status`, `updated_at`.
 
-**Sa app:** actual lunch/coffee duration at **net hours** (`time_out − time_in − breaks`), may date picker at table ng lahat ng users. Bawat punch ay nasa Activity Log din (`PUNCH`).
+**In the app:** actual lunch/coffee duration and **net hours** (`time_out − time_in − breaks`), with a date picker and a table of all users. Every punch is also recorded in the Activity Log (`PUNCH`).
 
 ---
 
 ## 9. Schedules — 2-week cycle
 
-Sa **Time In/Out → ⚙ Schedules** (Superadmin/Client lang). **Cashier at Inventory lang** ang sine-set.
+Go to **Time In/Out → ⚙ Schedules** (Superadmin/Client only). **Only Cashier and Inventory can be scheduled.**
 
 | Field | Details |
 |---|---|
-| Week 1 | `Mon … Sun` checkbox — **odd ISO weeks** |
-| Week 2 | `Mon … Sun` checkbox — **even ISO weeks**; kung blank, Week 1 ang gagamitin |
-| Time In / Time Out | Pareho sa dalawang week |
-| Grace period | Default `10` minuto |
+| Week 1 | `Mon … Sun` checkboxes — **odd ISO weeks** |
+| Week 2 | `Mon … Sun` checkboxes — **even ISO weeks**; if blank, Week 1 is used |
+| Time In / Time Out | Same for both weeks |
+| Grace period | Default `10` minutes |
 
-Makikita ang kasalukuyang week sa header: `2026-11-23 · Mon · Week 2`.
+The current week is shown in the header: `2026-11-23 · Mon · Week 2`.
 
 ### Flag logic
 
-| Flag | Ibig sabihin |
+| Flag | Meaning |
 |---|---|
-| `ON TIME` | TIME IN ≤ start + grace, walang early out |
-| `LATE Xm` | TIME IN lampas ng `X` minuto sa `start + grace` |
-| `ABSENT` | Scheduled araw pero walang TIME IN |
-| `UNDERTIME Xm` | May TIME OUT pero `X` minuto bago ang end time |
-| `DAY OFF` | Hindi kasama sa days ng employee para sa kasalukuyang week |
-| `NO SCHEDULE` | Wala pang naka-set na schedule |
+| `ON TIME` | TIME IN ≤ start + grace, with no early out |
+| `LATE Xm` | TIME IN is `X` minutes past `start + grace` |
+| `ABSENT` | Scheduled day but no TIME IN |
+| `UNDERTIME Xm` | Has TIME OUT but `X` minutes before end time |
+| `DAY OFF` | Not in the employee's days for the current week |
+| `NO SCHEDULE` | No schedule has been set yet |
 
 ```sql
 SELECT s.user_id, u.name, u.role,
@@ -187,18 +187,18 @@ FROM daniels_pos.schedules s
 JOIN daniels_pos.users u ON u.id = s.user_id;
 ```
 
-Bawat schedule change ay nasa Activity Log (`EDIT` · `schedule`) na may before/after.
+Every schedule change is written to the Activity Log (`EDIT` · `schedule`) with before/after values.
 
 ---
 
 ## 10. Troubleshooting
 
-| Sintomas | Solusyon |
+| Symptom | Solution |
 |---|---|
-| `DB offline — queued` | Hindi tumatakbo ang MySQL. I-run ulit ang `start-pos.bat`, tapos i-click ang **↻ Reload DB** — auto-sync ang queue. |
-| `Database walang users` | I-import ang `database.sql` sa phpMyAdmin. |
-| Hindi lumalabas ang bagong code | **Ctrl+F5** o i-run ulit ang `start-pos.bat`. |
-| Walang lumalabas na schedule flag | Wala pang naka-set na schedule; mag-set muna bilang Superadmin/Client. |
-| Manual insert sa phpMyAdmin nawala | Isara ang POS tabs bago mag-Insert, tapos mag-**↻ Reload DB**. |
-| `No partitioning defined` | Normal informational text sa phpMyAdmin — hindi error. |
-| Gusto i-reset lahat | I-import ulit ang `database.sql`. Kung kailangan ang lumang data, gamitin ang **↑ Import local** mula sa Desktop `app\index.html`. |
+| `DB offline — queued` | MySQL is not running. Run `start-pos.bat` again, then click **↻ Reload DB** — queued changes sync automatically. |
+| `Database has no users` | Import `database.sql` in phpMyAdmin. |
+| New code not showing | **Ctrl+F5** or run `start-pos.bat` again. |
+| No schedule flags appearing | No schedule has been set yet; set one as Superadmin/Client. |
+| Manual insert in phpMyAdmin disappeared | Close POS tabs before inserting, then click **↻ Reload DB**. |
+| `No partitioning defined` | Normal informational text in phpMyAdmin — not an error. |
+| Want to reset everything | Re-import `database.sql`. If you need the old data, use **↑ Import local** from the Desktop `app\index.html`. |
