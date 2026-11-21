@@ -41,7 +41,7 @@ GitHub Pages can only serve static files from `docs/`. PHP and MySQL cannot run 
 
   `https://welbert23.github.io/daniels-pos/?api=https://<random>.trycloudflare.invalid/daniels-pos/api.php`
 
-  The API URL is remembered in that browser (`localStorage` key `sipos_api_url`), so it only needs to be supplied once. After every tunnel restart, open the URL with the new `?api=` value once to update it. The current tunnel URL is also saved to `app\live-url.txt` and copied to the clipboard.
+  The API URL is remembered in that browser (`localStorage` key `sipos_api_url`), so it only needs to be supplied once. `app\start-live.bat` now opens this Pages URL automatically, saves it to `app\live-url.txt`, and copies it to the clipboard. After every tunnel restart, run the launcher again and use the newly generated link. The direct tunnel URL is still printed in the console as a fallback.
 
 Changes go to **MySQL on your PC**, so XAMPP must be running. Refresh the page or use **↻ Reload DB** (superadmin only) to see them.
 

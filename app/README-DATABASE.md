@@ -28,16 +28,14 @@ All business data lives in **XAMPP MySQL** (`daniels_pos`). When you add, edit, 
 
 ## 1b. Live access from other devices
 
-GitHub Pages cannot be used with a private repository on a free plan, so a **Cloudflare HTTPS tunnel** is used instead.
+The GitHub repository is public and the static frontend is hosted at `https://welbert23.github.io/daniels-pos/`. GitHub Pages cannot run PHP or MySQL, so a **Cloudflare HTTPS tunnel** exposes the local `api.php`.
 
 1. Double-click **`start-live.bat`** (or run `tools\start-live.ps1`).
-2. It starts XAMPP and the tunnel, then prints a public URL such as:
-   `https://<random>.trycloudflare.invalid/daniels-pos/index.html?v=16`
-3. Open that URL on another device. It is also saved to `app\live-url.txt`.
+2. It starts XAMPP and the tunnel, then opens the Pages URL with the current API URL embedded, for example:
+   `https://welbert23.github.io/daniels-pos/?api=https%3A%2F%2F<random>.trycloudflare.invalid%2Fdaniels-pos%2Fapi.php`
+3. That shareable URL is saved to `app\live-url.txt` and copied to the clipboard. The direct tunnel URL is also printed in the console as a fallback.
 
-The tunnel points directly to the local `daniels-pos` app, so the API call is still the relative `api.php` and the database remains your local MySQL. Server-side changes show up after a refresh or **↻ Reload DB**.
-
-The URL changes every time the tunnel restarts. Anyone with the URL can reach the login page, so keep it private and add network/auth protection before wider exposure. `cloudflared` is required (`winget install Cloudflare.cloudflared`).
+The database remains your local MySQL. Server-side changes show up after a refresh or **↻ Reload DB**. The URL changes every time the tunnel restarts. Anyone with the URL can reach the login page, so keep it private and add network/auth protection before wider exposure. `cloudflared` is required (`winget install Cloudflare.cloudflared`).
 
 
 ---

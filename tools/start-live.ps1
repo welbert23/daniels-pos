@@ -40,17 +40,22 @@ if (-not $url) {
     throw "Tunnel URL not found. Check: $log"
 }
 
-$liveUrl = "$url/daniels-pos/index.html?v=16"
-$liveUrl | Set-Content $urlFile -Encoding ASCII
+$apiUrl       = "$url/daniels-pos/api.php"
+$pagesUrl     = "https://welbert23.github.io/daniels-pos/?api=" + [uri]::EscapeDataString($apiUrl)
+$tunnelAppUrl = "$url/daniels-pos/index.html?v=17"
+
+$pagesUrl | Set-Content $urlFile -Encoding ASCII
 
 Write-Host ''
 Write-Host '============================================================'
-Write-Host " LIVE URL : $liveUrl"
-Write-Host " Saved to: $urlFile"
+Write-Host " PAGES URL : $pagesUrl"
+Write-Host " DIRECT    : $tunnelAppUrl"
+Write-Host " Saved to : $urlFile"
 Write-Host '============================================================'
 Write-Host ''
-Write-Host 'Open this URL on any device. It uses your local MySQL.'
-Write-Host 'The URL changes every time the tunnel restarts.'
+Write-Host 'Open/share the PAGES URL - it uses your local MySQL.'
+Write-Host 'It changes on every tunnel restart because the API URL changes.'
 Write-Host 'Press Ctrl+C to stop the launcher (the tunnel keeps running).'
 
-Start-Process $liveUrl
+try { Set-Clipboard -Value $pagesUrl } catch { Write-Host '(Clipboard unavailable)' }
+Start-Process $pagesUrl
