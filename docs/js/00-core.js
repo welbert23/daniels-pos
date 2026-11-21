@@ -19,11 +19,33 @@ const CAN={
   deleteStock:r=>r==='superadmin'||r==='client',
   manageStock:r=>r==='superadmin'||r==='client'
 };
-const CAT_PALETTE=['#B91C1C','#D97706','#7C3AED','#0369A1','#DB2777','#15803D','#2563EB','#CA8A04','#92400E','#0F766E'];
-function catColor(c){
-  let h=0;for(const ch of String(c))h=(h*31+ch.charCodeAt(0))>>>0;
-  return CAT_PALETTE[h%CAT_PALETTE.length];
+let _catColorCache={key:'',map:{}};
+function hslHex(h,s,l){
+  s/=100;l/=100;
+  const k=n=>(n+h/30)%12;
+  const a=s*Math.min(l,1-l);
+  const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1));
+  const v=n=>Math.round(255*f(n)).toString(16).padStart(2,'0');
+  return '#'+v(0)+v(8)+v(4);
 }
+function catColorAt(i){
+  const hue=(i*137.508)%360,tier=Math.floor(i/360);
+  return hslHex(hue,68-(tier%3)*8,38+(Math.floor(tier/3)%2)*12);
+}
+function catColorMap(){
+  const db=load(),cats=[];
+  const push=c=>{if(c&&!cats.some(x=>x.toLowerCase()===String(c).toLowerCase()))cats.push(c)};
+  (db.itemCats||[]).forEach(push);
+  (db.items||[]).forEach(i=>push(i.category));
+  (db.ingCats||[]).forEach(push);
+  (db.ingredients||[]).forEach(g=>push(g.category));
+  const key=cats.join('\u0001');
+  if(_catColorCache.key===key)return _catColorCache.map;
+  const map={};cats.forEach((c,i)=>map[c]=catColorAt(i));
+  _catColorCache={key,map};
+  return map;
+}
+function catColor(c){return catColorMap()[c]||'#6B7280'}
 function itemCats(){const db=load();return ['All',...new Set([...(db.itemCats||[]),...(db.items||[]).map(i=>i.category).filter(Boolean)])]}
 function ingCats(){const db=load();return ['All',...new Set([...(db.ingCats||[]),...(db.ingredients||[]).map(g=>g.category).filter(Boolean)])]}
 function addCategory(kind,name){

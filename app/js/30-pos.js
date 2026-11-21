@@ -18,7 +18,7 @@ function renderPOS(){
         <div class="pos-search">
           <div class="search-wrap"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="posSearch" placeholder="Search menu..." value="${esc(posQ)}" oninput="posQ=this.value.toLowerCase();renderPOS()"></div>
         </div>
-        <div class="cat-row">${itemCats().map(c=>`<div class="cat-pill ${catFilter===c?'active':''}" onclick="catFilter='${esc(c).replace(/'/g,"\\'")}';renderPOS()">${esc(c)} <span class="cnt">${catCounts[c]||0}</span></div>`).join('')}</div>
+        <div class="cat-row">${itemCats().map(c=>{const col=c==='All'?'var(--brand)':catColor(c),on=catFilter===c;return`<div class="cat-pill ${on?'active':''}" style="${on?`background:${col};color:#FFFDF5;`:''}" onclick="catFilter='${esc(c).replace(/'/g,"\\'")}';renderPOS()"><span class="cdot" style="background:${col}"></span>${esc(c)} <span class="cnt">${catCounts[c]||0}</span></div>`}).join('')}</div>
         <div class="plist">${f.length?f.map(i=>{
           const col=catColor(i.category);
           return`<div class="pcard ${i.stock===0?'out':''}" onclick="${i.stock>0?`addCart('${i.id}')`:''}">

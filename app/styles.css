@@ -211,6 +211,7 @@ input:focus{outline:none}
 .cat-pill:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
 .cat-pill.active{background:var(--brand);border-color:var(--ink);color:var(--ink);box-shadow:3px 3px 0 var(--ink)}
 .cat-pill .cnt{font-family:var(--font-m);font-size:9px;opacity:.65}
+.cat-pill .cdot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--ink);display:inline-block;margin-right:7px;vertical-align:-1px;flex:none}
 .field label.day-check{display:inline-flex;align-items:center;gap:6px;min-width:78px;margin-bottom:0;padding:7px 9px;text-align:left;white-space:nowrap;letter-spacing:.02em}
 .field label.day-check input[type=checkbox]{width:15px;height:15px;flex:none;margin:0;padding:0;box-shadow:none;accent-color:var(--brand)}
 .plist{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:14px;align-content:start;padding:2px}
