@@ -44,6 +44,14 @@ The tunnel points to your local `daniels-pos` app, so **MySQL still runs on your
 
 Requires `cloudflared` (installed via `winget install Cloudflare.cloudflared`).
 
+### Fixed URL via Firebase Hosting
+
+The static frontend is live at **https://red-plate-pos.web.app**. The current tunnel API URL is embedded into `public/js/00-api-config.js` when building, so the short URL works on any device without `?api=`.
+
+After restarting the tunnel:
+1. Run `app\start-live.bat` to refresh `app\live-url.txt`.
+2. Run `tools\deploy-firebase.ps1` to rebuild and redeploy with the new API URL.
+
 ---
 
 ## Features

@@ -39,6 +39,8 @@ The tunnel points directly to the local `daniels-pos` app, so the API call is st
 
 The URL changes every time the tunnel restarts. Anyone with the URL can reach the login page, so keep it private and add network/auth protection before wider exposure. `cloudflared` is required (`winget install Cloudflare.cloudflared`).
 
+**Fixed frontend URL:** the static files are deployed to Firebase Hosting at **https://red-plate-pos.web.app**. `tools\build-static.ps1` embeds the current tunnel API URL from `app\live-url.txt` into `public\js\00-api-config.js`, so the short URL needs no `?api=` parameter. Re-run `tools\deploy-firebase.ps1` after each tunnel restart to refresh the embedded API URL. The local app still uses relative `api.php`.
+
 ---
 
 ## 2. How sync works

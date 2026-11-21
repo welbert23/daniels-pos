@@ -81,12 +81,11 @@ function toast(msg){const t=$('#toast'),tx=$('#toastTxt');tx.textContent=msg;t.c
 const hideToast=()=>{const t=$('#toast');if(t)t.classList.remove('show');clearTimeout(_toastTimer)};
 
 /* --- storage: MySQL via api.php (every change is a real SQL write) --- */
-const IS_GH_PAGES = /\.github\.io$/i.test(location.hostname);
 const API_QUERY = new URLSearchParams(location.search).get('api');
-if (API_QUERY) localStorage.setItem('sipos_api_url', API_QUERY);
-const API = IS_GH_PAGES
-  ? (API_QUERY || localStorage.getItem('sipos_api_url') || 'api.php')
-  : (location.protocol === 'file:' ? 'http://localhost/daniels-pos/api.php' : 'api.php');
+const API_KEY = 'sipos_api_url_' + location.origin;
+if (API_QUERY) localStorage.setItem(API_KEY, API_QUERY);
+const API = API_QUERY || window.POS_API_URL || localStorage.getItem(API_KEY)
+  || (location.protocol === 'file:' ? 'http://localhost/daniels-pos/api.php' : 'api.php');
 const OFFLINE_KEY='sipos_offline_queue_v1';
 let DB=null, OFFLINE=false, _syncTimer=null, _syncing=false, _dirty=false;
 
