@@ -17,14 +17,16 @@ Double-click **`app\start-pos.bat`**. It starts XAMPP (Apache + MySQL) and opens
 
 ### Logins
 
-| Role | Username / Password | Access |
-|---|---|---|
-| **Superadmin** | `user / <redacted>` | Everything, including **Users** and DB tools |
-| **Client** | `client / <redacted>` | POS, inventory, ingredients, customers, sales, reports, schedules — **no** Users / DB tools |
-| **Cashier** | `staff / <redacted>` | POS only; view-only inventory/ingredients/time in-out |
-| **Inventory** | `inventory / <redacted>` | Add/edit inventory & ingredients, **no delete**, no POS |
+Accounts live in MySQL with hashed passwords. Credentials are **not** listed in this public repo - ask the system owner, or check the private `POS-Server\README-DATABASE.md`.
 
-> `staff` is treated as **Cashier** (legacy alias).
+| Role | Access |
+|---|---|
+| **Superadmin** | Everything, including **Users** and DB tools |
+| **Client** | POS, inventory, ingredients, customers, sales, reports, schedules - **no** Users / DB tools |
+| **Cashier** | POS only; view-only inventory/ingredients/time in-out |
+| **Inventory** | Add/edit inventory & ingredients, **no delete**, no POS |
+
+> The legacy `staff` account is treated as **Cashier**.
 
 ---
 
