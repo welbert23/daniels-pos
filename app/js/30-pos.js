@@ -5,7 +5,7 @@
 /* ============================================================
    POS
    ============================================================ */
-let cart=[],cartDiscount=0,cartCustomer='',cartNote='',orderType='Dine-in',catFilter='All',posQ='';
+let cart=[],cartSeq=0,cartDiscount=0,cartCustomer='',cartNote='',orderType='Dine-in',catFilter='All',posQ='';
 function cartTotals(){const sub=cart.reduce((s,c)=>s+c.price*c.qty,0);let disc=Math.round(sub*cartDiscount*100)/100;if(disc>sub)disc=sub;return{sub,disc,total:Math.round((sub-disc)*100)/100}}
 function renderPOS(){
   const db=load(),items=db.items.filter(i=>i.stock>0);
@@ -39,15 +39,15 @@ function renderPOS(){
     </div>`;
   renderCart();
 }
-function addCart(id){if(!CAN.usePOS(me().role))return toast('No POS access');const db=load(),it=db.items.find(i=>i.id===id);if(!it||it.stock<=0)return toast('Out of stock');const has=cart.find(c=>c.id===id);if(has){if(has.qty+1>it.stock)return toast('Only '+it.stock+' available');has.qty++}else cart.push({id,name:it.name,price:it.price,qty:1});renderCart()}
+function addCart(id){if(!CAN.usePOS(me().role))return toast('No POS access');const db=load(),it=db.items.find(i=>i.id===id);if(!it||it.stock<=0)return toast('Out of stock');const has=cart.find(c=>c.id===id);if(has){if(has.qty+1>it.stock)return toast('Only '+it.stock+' available');has.qty++;has.seq=++cartSeq}else cart.push({id,name:it.name,price:it.price,qty:1,seq:++cartSeq});renderCart()}
 function setQty(id,d){const db=load(),c=cart.find(x=>x.id===id),it=db.items.find(i=>i.id===id);if(!c)return;c.qty+=d;if(c.qty<=0)cart=cart.filter(x=>x.id!==id);else if(it&&c.qty>it.stock){c.qty=it.stock;toast('Max stock: '+it.stock)}renderCart()}
 function rmCart(id){cart=cart.filter(x=>x.id!==id);renderCart()}
-function clearCart(){cart=[];cartDiscount=0;cartCustomer='';cartNote='';renderCart()}
+function clearCart(){cart=[];cartSeq=0;cartDiscount=0;cartCustomer='';cartNote='';renderCart()}
 function renderCart(){
   const body=$('#cartBody'),foot=$('#cartFoot');if(!body)return;
   const db=load();
   if(!cart.length){body.innerHTML=`<div class="cart-empty"><b>Cart is empty</b>Tap a menu item to start</div>`}else{
-    body.innerHTML=cart.map(c=>`<div class="cline"><div class="info"><b>${esc(c.name)}</b><span>PHP ${money0(c.price)} each</span></div><div class="amt">PHP ${money0(c.price*c.qty)}</div><div class="qty"><button onclick="setQty('${c.id}',-1)">&minus;</button><b>${c.qty}</b><button onclick="setQty('${c.id}',1)">+</button></div><button class="rm" onclick="rmCart('${c.id}')"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`).join('')}
+    body.innerHTML=[...cart].sort((a,b)=>(b.seq||0)-(a.seq||0)).map(c=>`<div class="cline"><div class="info"><b>${esc(c.name)}</b><span>PHP ${money0(c.price)} each</span></div><div class="amt">PHP ${money0(c.price*c.qty)}</div><div class="qty"><button onclick="setQty('${c.id}',-1)">&minus;</button><b>${c.qty}</b><button onclick="setQty('${c.id}',1)">+</button></div><button class="rm" onclick="rmCart('${c.id}')"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`).join('')}
   const t=cartTotals(),discPct=t.sub?t.disc/t.sub*100:0;
   foot.innerHTML=`
     <div class="ot-row">${['Dine-in','Take-out','Delivery'].map(ot=>`<div class="ot-btn ${orderType===ot?'active':''}" onclick="orderType='${ot}';renderCart()">${ot}</div>`).join('')}</div>
@@ -99,7 +99,7 @@ function checkout(){
   }
   const trx={id:uid(),ref:refNo(),date:new Date().toISOString(),items:cart.map(c=>({name:c.name,qty:c.qty,price:c.price,line:0})),subtotal:t.sub,discount:t.disc,total:t.total,payment:paid,change:paid-t.total,cashier:me().name,cashierId:me().id,customer:customer?.name,customerId:customer?.id,orderType,note:cartNote.trim(),status:'completed'};
   cart.forEach(c=>{const it=db.items.find(i=>i.id===c.id);if(it)it.stock=Math.max(0,it.stock-c.qty);for(const r of (it&&it.recipe)||[])deductIngredient(db,r.name,r.qty*c.qty)});
-  db.transactions.push(trx);save(db);logAction('add','transaction',trx.id,trx.ref+' · PHP '+money0(trx.total),null,{ref:trx.ref,total:trx.total,items:trx.items});cart=[];cartDiscount=0;cartCustomer='';cartNote='';renderCart();renderNav();showReceiptModal(trx);toast('Order completed — '+trx.ref);
+  db.transactions.push(trx);save(db);logAction('add','transaction',trx.id,trx.ref+' · PHP '+money0(trx.total),null,{ref:trx.ref,total:trx.total,items:trx.items});cart=[];cartSeq=0;cartDiscount=0;cartCustomer='';cartNote='';renderCart();renderNav();showReceiptModal(trx);toast('Order completed — '+trx.ref);
 }
 
 /* --- receipt --- */
