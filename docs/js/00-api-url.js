@@ -1,1 +1,1 @@
-window.POS_API_URL = "https://<redacted>.trycloudflare.invalid/daniels-pos/api.php";
+window.POS_API_URL = "https://<redacted>.trycloudflare.invalid/pos-inventory-management-system/api.php";
