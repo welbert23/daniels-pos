@@ -6,7 +6,7 @@ MySQL-backed POS, inventory, ingredients, attendance, schedules, and audit trail
 
 ## Quick start
 
-Double-click **`app\start-pos.bat`**. It starts XAMPP (Apache + MySQL) and opens the POS in your browser.
+Double-click **`POS-Server\start-pos.bat`** from the private server folder. It starts XAMPP (Apache + MySQL) and opens the POS in your browser.
 
 | Item | Address |
 |---|---|
@@ -39,7 +39,7 @@ The GitHub repository is **public**, and the static frontend is published with G
 GitHub Pages can only serve static files from `docs/`. PHP and MySQL cannot run there, so the real `api.php` stays on your PC in the **private** `pos-inventory-server` repo; the public repo only has a stub that requires the private file.
 
 - **Offline-first after sign-in:** open the Pages URL as-is. Sign in once while XAMPP/the tunnel is online; the token and session are cached, so later sessions can work from queued/local data. To move old browser data into MySQL, use **↑ Import local** from the Desktop `app\index.html`.
-- **Live MySQL:** double-click **`app\start-live.bat`**. It starts XAMPP and a Cloudflare tunnel, saves the API URL **only** to `POS-Server\api-url.txt`, rebuilds Pages with no embedded URL, then opens a URL like:
+- **Live MySQL:** double-click **`POS-Server\start-live.bat`**. It starts XAMPP and a Cloudflare tunnel, saves the API URL **only** to `POS-Server\api-url.txt`, rebuilds Pages with no embedded URL, then opens a URL like:
 
   `https://welbert23.github.io/pos-inventory-management-system/?r=a1b2c3&api=<tunnel>`
 
@@ -88,15 +88,13 @@ POS-System/
 │   ├── index.html          markup
 │   ├── styles.css          all CSS
 │   ├── js/                 16 JS files (15 feature modules + runtime API config)
-│   ├── api.php             public stub -> private POS-Server\api.php
-│   ├── start-pos.bat       XAMPP + browser launcher
-│   └── start-live.bat      XAMPP + public HTTPS tunnel launcher
+│   └── api.php             public stub -> private POS-Server\api.php
 ├── docs/         → Generated GitHub Pages site (no PHP/MySQL)
-├── tools/        → start-live.ps1, build-pages.ps1
+├── tools/        → build-pages.ps1 only
 └── README.md     → This file
 ```
 
-`app\api-url.txt` and `app\live-url.txt` are generated, gitignored files.
+`app\api-url.txt` and `app\live-url.txt` are generated, gitignored files. The launchers (`start-pos.bat`, `start-live.bat`, `tools\start-live.ps1`) live in the private `POS-Server` repo.
 
 Design/Penpot files, old versions, PDFs, session notes, and screenshot/PDF scripts are archived outside the repo at `C:\Users\Admin\OneDrive\Desktop\POS-System-Archive\`.
 
@@ -172,10 +170,10 @@ Close all POS tabs first, insert the row in phpMyAdmin, then log in as superadmi
 
 | Symptom | Solution |
 |---|---|
-| Stale UI / new code not showing | **Ctrl+F5** or run `start-pos.bat` again |
-| `DB offline — queued` | MySQL is not running. Run `start-pos.bat` again, then click **↻ Reload DB** — queued changes sync on the next successful connect. |
+| Stale UI / new code not showing | **Ctrl+F5** or run `POS-Server\start-pos.bat` again |
+| `DB offline — queued` | MySQL is not running. Run `POS-Server\start-pos.bat` again, then click **↻ Reload DB** — queued changes sync on the next successful connect. |
 | `Session expired` / `Unauthorized` | Sign in again; the token expired or was rejected by the server. |
-| Live URL gives 404 / CORS error | Run `app\start-live.bat` again; the Cloudflare tunnel URL changes on restart. |
+| Live URL gives 404 / CORS error | Run `POS-Server\start-live.bat` again; the Cloudflare tunnel URL changes on restart. |
 | `Database has no users` | Import `POS-Server\database.sql` in phpMyAdmin. |
 | No schedule flags appearing | No schedule has been set yet; set one as Superadmin/Client. |
 | `No partitioning defined` in phpMyAdmin | Normal informational text — not an error. |
