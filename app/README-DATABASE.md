@@ -28,11 +28,11 @@ All business data lives in **XAMPP MySQL** (`daniels_pos`). When you add, edit, 
 
 ## 1b. Live access from other devices
 
-The GitHub repository is public and the static frontend is hosted at `https://welbert23.github.io/daniels-pos/`. GitHub Pages cannot run PHP or MySQL, so a **Cloudflare HTTPS tunnel** exposes the local `api.php`.
+The GitHub repository is public and the static frontend is hosted at `https://welbert23.github.io/pos-inventory-management-system/`. GitHub Pages cannot run PHP or MySQL, so a **Cloudflare HTTPS tunnel** exposes the local `api.php`.
 
 1. Double-click **`start-live.bat`** (or run `tools\start-live.ps1`).
 2. It starts XAMPP and the tunnel, writes the API URL to `docs/js/00-api-url.js`, pushes it, waits for the Pages rebuild, then opens a short URL such as:
-   `https://welbert23.github.io/daniels-pos/?r=a1b2c3`
+   `https://welbert23.github.io/pos-inventory-management-system/?r=a1b2c3`
 3. The `?r=` value only busts the cache; the real tunnel URL comes from the auto-updated config file. That shareable URL is saved to `app\live-url.txt` and copied to the clipboard. The direct tunnel URL is also printed in the console as a fallback.
 
 The database remains your local MySQL. Server-side changes show up after a refresh or **↻ Reload DB**. The URL changes every time the tunnel restarts. Anyone with the URL can reach the login page, so keep it private and add network/auth protection before wider exposure. `cloudflared` is required (`winget install Cloudflare.cloudflared`).

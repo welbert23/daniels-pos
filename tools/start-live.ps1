@@ -72,7 +72,7 @@ if ($changed) {
     Write-Host 'Waiting for GitHub Pages build...'
     try {
         for ($i = 0; $i -lt 20; $i++) {
-            $build = gh api repos/welbert23/daniels-pos/pages/builds/latest 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue
+            $build = gh api repos/welbert23/pos-inventory-management-system/pages/builds/latest 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue
             if ($build -and $build.status -eq 'built' -and $build.commit -like "$commit*") { break }
             Start-Sleep -Seconds 3
         }
@@ -83,7 +83,7 @@ if ($changed) {
 }
 
 $token    = [guid]::NewGuid().ToString('N').Substring(0, 6)
-$pagesUrl = "https://welbert23.github.io/daniels-pos/?r=$token"
+$pagesUrl = "https://welbert23.github.io/pos-inventory-management-system/?r=$token"
 $pagesUrl | Set-Content $urlFile -Encoding ASCII
 
 Write-Host ''

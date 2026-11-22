@@ -32,14 +32,14 @@ Double-click **`app\start-pos.bat`**. It starts XAMPP (Apache + MySQL) and opens
 
 The GitHub repository is **public**, and the static frontend is published with GitHub Pages at:
 
-**https://welbert23.github.io/daniels-pos/**
+**https://welbert23.github.io/pos-inventory-management-system/**
 
 GitHub Pages can only serve static files from `docs/`. PHP and MySQL cannot run there, so `api.php` stays on your PC.
 
 - **Offline mode (default):** open the Pages URL as-is. The app uses the offline queue and any data already saved in that browser. To move old browser data into MySQL, use **↑ Import local** from the Desktop `app\index.html`.
 - **Live MySQL:** double-click **`app\start-live.bat`**. It starts XAMPP and a Cloudflare tunnel, writes the new API URL to `docs/js/00-api-url.js`, commits/pushes it, waits for GitHub Pages to rebuild, then opens a short URL like:
 
-  `https://welbert23.github.io/daniels-pos/?r=a1b2c3`
+  `https://welbert23.github.io/pos-inventory-management-system/?r=a1b2c3`
 
   The random `?r=` value only busts the browser/CDN cache. The real tunnel URL is read from the auto-updated config file, so no long `?api=` link is needed. The shareable URL is saved to `app\live-url.txt` and copied to the clipboard; the direct tunnel URL is printed in the console as a fallback. A manual `?api=<url>` still works and overrides the config for that browser.
 
