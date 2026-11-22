@@ -7,6 +7,7 @@
    ============================================================ */
 function localData(){try{const r=JSON.parse(localStorage.getItem(DB_KEY));return r&&r.items?r:null}catch(e){return null}}
 async function boot(){
+  applySidebar();
   dbStatus('saving','Connecting…');
   try{
     const r=await fetch(API+'?action=bootstrap',{cache:'no-store'});

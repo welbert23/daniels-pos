@@ -115,6 +115,18 @@ let DB=null, OFFLINE=false, _syncTimer=null, _syncing=false, _dirty=false;
 function emptyDB(){return{meta:{seq:0,seed:''},itemCats:[],ingCats:[],items:[],ingredients:[],transactions:[],customers:[],users:[]}}
 function load(){if(!DB)DB=emptyDB();return DB}
 function session(){try{return JSON.parse(localStorage.getItem(SESSION_KEY))}catch(e){return null}}
+const SIDE_HIDDEN_KEY='sipos_side_hidden_v1';
+function applySidebar(){
+  const hidden=localStorage.getItem(SIDE_HIDDEN_KEY)==='1';
+  const app=$('#app');if(app)app.classList.toggle('sidebar-hidden',hidden);
+  const btn=$('#sideToggle');
+  if(btn){btn.setAttribute('aria-expanded',hidden?'false':'true');btn.title=hidden?'Show menu':'Hide menu';btn.setAttribute('aria-label',hidden?'Show menu':'Hide menu')}
+}
+function toggleSidebar(){
+  const hidden=localStorage.getItem(SIDE_HIDDEN_KEY)!=='1';
+  localStorage.setItem(SIDE_HIDDEN_KEY,hidden?'1':'0');
+  applySidebar();
+}
 
 function dbStatus(kind,txt){const el=$('#dbChip');if(!el)return;el.className='dbchip '+kind;el.innerHTML='<i></i><span>'+txt+'</span>'}
 function syncDbTools(){const el=$('#dbTools');if(!el)return;const s=session();el.style.display=s&&s.role==='superadmin'?'flex':'none'}

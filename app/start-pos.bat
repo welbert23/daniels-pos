@@ -9,9 +9,9 @@ start "" "C:\xampp\xampp_start.exe"
 timeout /t 8 /nobreak >nul
 echo.
 echo Opening POS app...
-start "" "http://localhost/daniels-pos/index.html?v=30"
+start "" "http://localhost/daniels-pos/index.html?v=31"
 echo.
-echo   App:        http://localhost/daniels-pos/index.html?v=30
+echo   App:        http://localhost/daniels-pos/index.html?v=31
 echo   phpMyAdmin: http://localhost/phpmyadmin/index.php?route=/database/structure^&db=daniels_pos
 echo   Database:   daniels_pos  ^|  user: root  ^|  password: (blank)
 echo.

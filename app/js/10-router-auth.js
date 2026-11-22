@@ -41,6 +41,7 @@ function doLogin(){
   localStorage.setItem(SESSION_KEY,JSON.stringify({id:user.id,name:user.name,username:user.username,role:user.role}));
   syncDbTools();
   $('#login').style.display='none';$('#app').style.display='block';
+  applySidebar();
   $('#userName').textContent=user.name;$('#userRole').textContent=ROLE_LABEL[user.role];
   $('#userAvatar').textContent=(user.name||'?').trim().charAt(0).toUpperCase();
   go('dashboard');toast('Welcome back, '+user.name.split(' ')[0]+'!')
