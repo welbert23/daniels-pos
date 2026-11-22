@@ -20,8 +20,8 @@ async function boot(){
     }else if(j.empty){
       DB=j.db;
       dbStatus('err','Database empty');
-      const err=$('#loginErr');if(err){err.style.display='block';err.textContent='Database has no users — import app\\database.sql in phpMyAdmin.'}
-      toast('Database empty — import database.sql');
+      const err=$('#loginErr');if(err){err.style.display='block';err.textContent='Database has no users — import POS-Server\\database.sql in phpMyAdmin.'}
+      toast('Database empty — import POS-Server\\database.sql');
     }else{DB=j.db;dbStatus('ok','MySQL connected')}
   }catch(e){
     console.error('[POS] MySQL bootstrap failed:',e);
@@ -30,7 +30,7 @@ async function boot(){
     if(!old)old=localData();
     DB=old?migrate(old):emptyDB();
     dbStatus('err','DB offline — queued');
-    if(!old){const err=$('#loginErr');if(err){err.style.display='block';err.textContent='Database offline with no local data — import database.sql, or open this page with a ?api=<tunnel URL> parameter.'}}
+    if(!old){const err=$('#loginErr');if(err){err.style.display='block';err.textContent='Database offline with no local data — import POS-Server\\database.sql, or open this page with a ?api=<tunnel URL> parameter.'}}
   }
   const s=session();
   if(s){const db=load();if(db.users.find(u=>u.id===s.id)){syncDbTools();$('#login').style.display='none';$('#app').style.display='block';$('#userName').textContent=s.name;$('#userRole').textContent=ROLE_LABEL[s.role];$('#userAvatar').textContent=(s.name||'?').trim().charAt(0).toUpperCase();go('dashboard');return}localStorage.removeItem(SESSION_KEY)}

@@ -13,7 +13,7 @@ Double-click **`app\start-pos.bat`**. It starts XAMPP (Apache + MySQL) and opens
 | App | `http://localhost/pos-inventory-management-system/index.html` |
 | phpMyAdmin | `http://localhost/phpmyadmin/index.php?route=/database/structure&db=pos_inventory` |
 
-> The launcher adds a cache-buster (`?v=35`). If you have an old tab open, press **Ctrl+F5**.
+> The launcher adds a cache-buster (`?v=36`). If you have an old tab open, press **Ctrl+F5**.
 
 ### Logins
 
@@ -34,14 +34,14 @@ The GitHub repository is **public**, and the static frontend is published with G
 
 **https://welbert23.github.io/pos-inventory-management-system/**
 
-GitHub Pages can only serve static files from `docs/`. PHP and MySQL cannot run there, so `api.php` stays on your PC.
+GitHub Pages can only serve static files from `docs/`. PHP and MySQL cannot run there, so the real `api.php` stays on your PC in the **private** `pos-inventory-server` repo; the public repo only has a stub.
 
 - **Offline mode (default):** open the Pages URL as-is. The app uses the offline queue and any data already saved in that browser. To move old browser data into MySQL, use **↑ Import local** from the Desktop `app\index.html`.
-- **Live MySQL:** double-click **`app\start-live.bat`**. It starts XAMPP and a Cloudflare tunnel, writes the new API URL to `docs/js/00-api-url.js`, commits/pushes it, waits for GitHub Pages to rebuild, then opens a short URL like:
+- **Live MySQL:** double-click **`app\start-live.bat`**. It starts XAMPP and a Cloudflare tunnel, saves the API URL **only** to `POS-Server\api-url.txt`, rebuilds Pages with no embedded URL, then opens a URL like:
 
-  `https://welbert23.github.io/pos-inventory-management-system/?r=a1b2c3`
+  `https://welbert23.github.io/pos-inventory-management-system/?r=a1b2c3&api=<tunnel>`
 
-  The random `?r=` value only busts the browser/CDN cache. The real tunnel URL is read from the auto-updated config file, so no long `?api=` link is needed. The shareable URL is saved to `app\live-url.txt` and copied to the clipboard; the direct tunnel URL is printed in the console as a fallback. A manual `?api=<url>` still works and overrides the config for that browser.
+  The random `?r=` value only busts the browser/CDN cache. The `&api=` value is saved into that browser localStorage on first open so the app can reach your local MySQL. The tunnel URL is **not** committed to the public repo. The shareable URL is saved to `app\live-url.txt` and copied to the clipboard; a manual `?api=<url>` still works and overrides the saved value.
 
 Changes go to **MySQL on your PC**, so XAMPP must be running. Refresh the page or use **↻ Reload DB** (superadmin only) to see them.
 
@@ -76,17 +76,19 @@ POS-System/
 │   ├── index.html          markup
 │   ├── styles.css          all CSS
 │   ├── js/                 15 feature modules (see below)
-│   ├── api.php             MySQL bridge (bootstrap/save/audit/attendance/schedules)
-│   ├── database.sql        schema + initial users/categories
+│   ├── api.php             public stub -> private POS-Server\api.php
+
 │   ├── start-pos.bat       XAMPP + browser launcher
-│   ├── start-live.bat      XAMPP + public HTTPS tunnel launcher
-│   └── README-DATABASE.md  detailed database docs
+│   └── start-live.bat      XAMPP + public HTTPS tunnel launcher
+
 ├── docs/         → Generated GitHub Pages site (no PHP/MySQL)
 ├── tools/        → start-live.ps1, build-pages.ps1
 └── README.md     → This file
 ```
 
 Design/Penpot files, old versions, PDFs, session notes, and screenshot/PDF scripts are archived outside the repo at `C:\Users\Admin\OneDrive\Desktop\POS-System-Archive\`.
+
+Server/database files are in the private repo at C:\Users\Admin\OneDrive\Desktop\New folder\POS-Server\.
 
 ### JavaScript modules (`app/js/`)
 
@@ -124,7 +126,7 @@ Data lives in **XAMPP MySQL**, not in the project folder:
 
 Tables: `meta`, `users`, `categories`, `items`, `item_recipes`, `ingredients`, `customers`, `transactions`, `transaction_items`, `attendance`, `schedules`, `audit_log`.
 
-Initial users and categories are defined in `app\database.sql`. All items, recipes, ingredients, customers, and transactions live in MySQL.
+Initial users and categories are defined in `POS-Server\database.sql` (private repo). All items, recipes, ingredients, customers, and transactions live in MySQL.
 
 ---
 
@@ -155,7 +157,7 @@ Close all POS tabs first, insert the row in phpMyAdmin, then log in as superadmi
 |---|---|
 | Stale UI / new code not showing | **Ctrl+F5** or run `start-pos.bat` again |
 | `DB offline — queued` | MySQL is not running. Run `start-pos.bat` again, then click **↻ Reload DB** — queued changes sync automatically. |
-| `Database has no users` | Import `app\database.sql` in phpMyAdmin. |
+| `Database has no users` | Import `POS-Server\database.sql` in phpMyAdmin. |
 | No schedule flags appearing | No schedule has been set yet; set one as Superadmin/Client. |
 | `No partitioning defined` in phpMyAdmin | Normal informational text — not an error. |
 
@@ -164,4 +166,4 @@ Close all POS tabs first, insert the row in phpMyAdmin, then log in as superadmi
 
 ## Detailed docs
 
-See **`app\README-DATABASE.md`** for schema, SQL queries, import flow, roles, attendance, schedules, audit, and deeper troubleshooting.
+See **`POS-Server\README-DATABASE.md`** for schema, SQL queries, import flow, roles, attendance, schedules, audit, and deeper troubleshooting.

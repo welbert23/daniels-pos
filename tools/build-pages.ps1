@@ -23,30 +23,15 @@ Get-ChildItem -LiteralPath (Join-Path $app 'js') -Filter '*.js' | ForEach-Object
     Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $docs 'js')
 }
 
-$apiFile = Join-Path $app 'api-url.txt'
-$apiUrl = ''
-if (Test-Path -LiteralPath $apiFile) {
-    $apiUrl = (Get-Content -LiteralPath $apiFile -Raw).Trim()
-}
-$config = 'window.POS_API_URL = ' + (ConvertTo-Json -InputObject $apiUrl -Compress) + ';'
+$config = 'window.POS_API_URL = "";'
 [IO.File]::WriteAllText((Join-Path $docs 'js\00-api-url.js'), $config, [System.Text.UTF8Encoding]::new($false))
 
-$hash = 'none'
-if ($apiUrl) {
-    $sha = [System.Security.Cryptography.SHA256]::Create()
-    try {
-        $bytes = [System.Text.Encoding]::UTF8.GetBytes($apiUrl)
-        $hash = (-join ($sha.ComputeHash($bytes) | ForEach-Object { $_.ToString('x2') })).Substring(0, 8)
-    }
-    finally {
-        $sha.Dispose()
-    }
-}
 $indexPath = Join-Path $docs 'index.html'
 $html = [IO.File]::ReadAllText($indexPath, [System.Text.Encoding]::UTF8)
-$html = $html.Replace('js/00-api-url.js?v=35', "js/00-api-url.js?v=$hash")
+$html = [regex]::Replace($html, 'js/00-api-url\.js\?v=[^"\']+', 'js/00-api-url.js?v=public')
 [IO.File]::WriteAllText($indexPath, $html, [System.Text.UTF8Encoding]::new($false))
 
 New-Item -ItemType File -Path (Join-Path $docs '.nojekyll') -Force | Out-Null
 
 Write-Output "Built static GitHub Pages site in: $docs"
+Write-Output 'API URL is runtime-only; no tunnel URL is written to the public repo.'
