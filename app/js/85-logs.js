@@ -17,7 +17,7 @@ function fmtLogTs(s){
 async function renderLogs(){
   $('#content').innerHTML='<div class="card"><div class="card-empty">Loading activity log…</div></div>';
   try{
-    const j=await(await fetch(API+'?action=logs&limit=500',{cache:'no-store'})).json();
+    const j=await(await apiFetch('logs&limit=500')).json();
     if(!j.ok)throw new Error(j.error||'Cannot load logs');
     _logsCache=j.logs||[];
     const rows=_logsCache.filter(l=>(logFilter==='All'||l.action===logFilter)&&(!logQ||[l.actor_name,l.actor_username,l.entity,l.summary,l.action].some(v=>String(v||'').toLowerCase().includes(logQ))));

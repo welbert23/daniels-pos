@@ -33,19 +33,30 @@ function go(k){hideToast();if(k==='pos'&&!CAN.usePOS(me().role))k='dashboard';if
   fns[k]();if(k==='pos')setTimeout(()=>$('#posSearch')?.focus(),60)}
 
 /* --- auth --- */
-function doLogin(){
-  if(!DB)return toast('Connecting to database…');
-  const u=$('#logUser').value.trim(),p=$('#logPass').value.trim(),db=load();
-  const user=db.users.find(x=>x.username.toLowerCase()===u.toLowerCase()&&x.password===p);
-  if(!user){$('#loginErr').style.display='block';return}
-  localStorage.setItem(SESSION_KEY,JSON.stringify({id:user.id,name:user.name,username:user.username,role:user.role}));
-  syncDbTools();
-  $('#login').style.display='none';$('#app').style.display='block';
-  applySidebar();
-  $('#userName').textContent=user.name;$('#userRole').textContent=ROLE_LABEL[user.role];
-  $('#userAvatar').textContent=(user.name||'?').trim().charAt(0).toUpperCase();
-  go('dashboard');toast('Welcome back, '+user.name.split(' ')[0]+'!')
+async function doLogin(){
+  const u=$('#logUser').value.trim(),p=$('#logPass').value.trim(),err=$('#loginErr');
+  if(err){err.style.display='none'}
+  if(!u||!p){if(err){err.style.display='block';err.textContent='Username at password required.'}return}
+  try{
+    const r=await apiFetch('login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    const j=await r.json();
+    if(!j.ok)throw new Error(j.error||'Invalid username or password');
+    localStorage.setItem(TOKEN_KEY,j.token);
+    localStorage.setItem(SESSION_KEY,JSON.stringify(j.user));
+    const b=await apiFetch('bootstrap');
+    const bj=await b.json();
+    if(!bj.ok)throw new Error(bj.error||'Database error');
+    DB=bj.db;OFFLINE=false;dbStatus('ok','MySQL connected');syncDbTools();
+    $('#login').style.display='none';$('#app').style.display='block';
+    applySidebar();
+    const user=j.user;
+    $('#userName').textContent=user.name;$('#userRole').textContent=ROLE_LABEL[user.role];
+    $('#userAvatar').textContent=(user.name||'?').trim().charAt(0).toUpperCase();
+    go('dashboard');toast('Welcome back, '+user.name.split(' ')[0]+'!')
+  }catch(e){
+    localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(SESSION_KEY);
+    if(err){err.style.display='block';err.textContent=e.name==='SessionExpired'?'Session expired - try again.':(e.message||'Login failed.')}
+  }
 }
-function doLogout(){localStorage.removeItem(SESSION_KEY);syncDbTools();$('#app').style.display='none';$('#login').style.display='flex';$('#logUser').value='';$('#logPass').value='';$('#loginErr').style.display='none';current='dashboard'}
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&getComputedStyle($('#login')).display!=='none'&&document.activeElement.id?.startsWith('log'))doLogin()});
+function doLogout(){localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(SESSION_KEY);syncDbTools();$('#app').style.display='none';$('#login').style.display='flex';$('#logUser').value='';$('#logPass').value='';$('#loginErr').style.display='none';current='dashboard'}document.addEventListener('keydown',e=>{if(e.key==='Enter'&&getComputedStyle($('#login')).display!=='none'&&document.activeElement.id?.startsWith('log'))doLogin()});
 

@@ -49,7 +49,7 @@ if (-not $url) {
 }
 
 $apiUrl       = "$url/pos-inventory-management-system/api.php"
-$tunnelAppUrl = "$url/pos-inventory-management-system/index.html?v=36"
+$tunnelAppUrl = "$url/pos-inventory-management-system/index.html?v=38"
 
 $apiUrl | Set-Content $apiFile -Encoding ASCII
 Write-Host 'API URL saved to the PRIVATE server folder only.'

@@ -13,7 +13,7 @@ Double-click **`app\start-pos.bat`**. It starts XAMPP (Apache + MySQL) and opens
 | App | `http://localhost/pos-inventory-management-system/index.html` |
 | phpMyAdmin | `http://localhost/phpmyadmin/index.php?route=/database/structure&db=pos_inventory` |
 
-> The launcher adds a cache-buster (`?v=36`). If you have an old tab open, press **Ctrl+F5**.
+> The launcher adds a cache-buster (`?v=38`). If you have an old tab open, press **Ctrl+F5**.
 
 ### Logins
 
@@ -52,7 +52,7 @@ powershell -ExecutionPolicy Bypass -File tools\build-pages.ps1
 git add docs && git commit -m "Update Pages site" && git push
 ```
 
-> The tunnel URL changes on every restart. Anyone with the Pages URL can reach the login page; access control is UI-level only. Because the repository is public, change the default logins before real use and do not store secrets in the repo.
+> The tunnel URL changes on every restart. Anyone with the Pages URL can reach the login page, but credentials are verified by `api.php`, passwords are hashed, and every request needs a signed token. Roles are enforced server-side. The first sign-in needs the API online; after that, a cached token allows offline queued work.
 
 Requires `cloudflared` (installed via `winget install Cloudflare.cloudflared`) only for live MySQL access.
 
@@ -119,7 +119,7 @@ Data lives in **XAMPP MySQL**, not in the project folder:
 | Item | Value |
 |---|---|
 | Database | `pos_inventory` |
-| MySQL user | `root` (blank password) |
+| MySQL user | `pos_app` (credentials in private `POS-Server\config.local.php`) |
 | Physical files | `C:\xampp\mysql\data\pos_inventory\` |
 | Web root (junction) | `C:\xampp\htdocs\pos-inventory-management-system` → `...\POS-System\app` |
 | Viewer | **phpMyAdmin ↗** button in the POS topbar (superadmin) |

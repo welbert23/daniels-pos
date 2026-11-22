@@ -109,6 +109,17 @@ if (API_QUERY) localStorage.setItem('sipos_api_url', API_QUERY);
 const API = IS_GH_PAGES
   ? (API_QUERY || window.POS_API_URL || localStorage.getItem('sipos_api_url') || 'api.php')
   : (location.protocol === 'file:' ? 'http://localhost/pos-inventory-management-system/api.php' : 'api.php');
+const TOKEN_KEY = 'sipos_token_v1';
+function authToken(){return localStorage.getItem(TOKEN_KEY)||''}
+function authHeaders(extra={}){return Object.assign({'Content-Type':'application/json','X-POS-Token':authToken()},extra||{})}
+async function apiFetch(action,opts={}){
+  const r=await fetch(API+'?action='+action,Object.assign({cache:'no-store'},opts,{headers:authHeaders(opts.headers||{})}));
+  if(r.status===401){
+    localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(SESSION_KEY);
+    const e=new Error('Session expired');e.name='SessionExpired';throw e;
+  }
+  return r;
+}
 const OFFLINE_KEY='sipos_offline_queue_v1';
 let DB=null, OFFLINE=false, _syncTimer=null, _syncing=false, _dirty=false;
 
@@ -134,7 +145,7 @@ function requireSuper(){const s=session();if(!s||s.role!=='superadmin'){toast('S
 function logAction(action,entity,entityId,summary,before,after){
   const s=session()||{},u=(DB?.users||[]).find(x=>x.id===s.id)||s;
   const payload={ts:new Date().toISOString(),actor_id:u.id||'',actor_name:u.name||'',actor_username:u.username||'',actor_role:u.role||'',action,entity,entity_id:String(entityId||''),summary:summary||'',before:before?JSON.stringify(before):null,after:after?JSON.stringify(after):null};
-  fetch(API+'?action=audit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),keepalive:true}).catch(e=>console.error('[POS] audit log failed:',e));
+  apiFetch('audit',{method:'POST',body:JSON.stringify(payload),keepalive:true}).catch(e=>console.error('[POS] audit log failed:',e));
 }
 function save(db){DB=db;if(OFFLINE){localStorage.setItem(OFFLINE_KEY,JSON.stringify(db));dbStatus('err','DB offline — queued');return}_dirty=true;dbStatus('pending','Saving…');clearTimeout(_syncTimer);_syncTimer=setTimeout(()=>flushDB(),100)}
 async function flushDB(force){
@@ -143,7 +154,7 @@ async function flushDB(force){
   const snapshot=JSON.stringify(DB);
   dbStatus('saving','Saving…');
   try{
-    const r=await fetch(API+'?action=save',{method:'POST',headers:{'Content-Type':'application/json'},body:snapshot});
+    const r=await apiFetch('save',{method:'POST',body:snapshot});
     const j=await r.json();
     if(!j.ok)throw new Error(j.error||'Database error');
     localStorage.removeItem(OFFLINE_KEY);
@@ -158,7 +169,7 @@ async function pushQueued(){
   const q=localStorage.getItem(OFFLINE_KEY);
   if(!q)return false;
   try{
-    const r=await fetch(API+'?action=save',{method:'POST',headers:{'Content-Type':'application/json'},body:q});
+    const r=await apiFetch('save',{method:'POST',body:q});
     const j=await r.json();
     if(!j.ok)throw new Error(j.error||'Database error');
     localStorage.removeItem(OFFLINE_KEY);
@@ -182,12 +193,12 @@ async function refreshDB(){
   if(!requireSuper())return;
   dbStatus('saving','Refreshing…');
   try{
-    const r=await fetch(API+'?action=bootstrap',{cache:'no-store'});
+    const r=await apiFetch('bootstrap');
     const j=await r.json();
     if(!j.ok)throw new Error(j.error||'Database error');
     OFFLINE=false;_dirty=false;clearTimeout(_syncTimer);
     if(await pushQueued())toast('Queued changes synced to MySQL');
-    const fresh=await (await fetch(API+'?action=bootstrap',{cache:'no-store'})).json();
+    const fresh=await (await apiFetch('bootstrap')).json();
     DB=fresh.db;
     dbStatus('ok','MySQL connected');
     go(current);toast('Loaded latest data from MySQL');

@@ -53,8 +53,8 @@ async function renderAttendance(){
   $('#content').innerHTML='<div class="card"><div class="card-empty">Loading attendance…</div></div>';
   try{
     const [ar,sr]=await Promise.all([
-      fetch(API+'?action=attendance&date='+encodeURIComponent(attDate),{cache:'no-store'}),
-      fetch(API+'?action=schedules',{cache:'no-store'}),
+      apiFetch('attendance&date='+encodeURIComponent(attDate)),
+      apiFetch('schedules'),
     ]);
     const j=await ar.json(),sj=await sr.json();
     if(!j.ok)throw new Error(j.error||'Cannot load attendance');
@@ -94,7 +94,7 @@ async function renderAttendance(){
 async function punch(type){
   const s=session()||{},u=(DB.users||[]).find(x=>x.id===s.id)||s;
   try{
-    const j=await(await fetch(API+'?action=punch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type,ts:localStamp(),user_id:u.id,username:u.username||'',name:u.name||'',role:u.role||''})})).json();
+    const j=await(await apiFetch('punch',{method:'POST',body:JSON.stringify({type,ts:localStamp(),user_id:u.id,username:u.username||'',name:u.name||'',role:u.role||''})})).json();
     if(!j.ok)return toast(j.error||'Punch failed');
     logAction('punch','attendance',j.row.id,PUNCH_LABEL[type]+' · '+(u.name||''));
     toast(PUNCH_LABEL[type]+' recorded — '+fmtClock(j.row[type]));
@@ -129,7 +129,7 @@ async function saveSchedule(id){
   const start=$('#sch_start').value,end=$('#sch_end').value,grace=Number($('#sch_grace').value||0);
   if(!start||!end)return toast('Time in at time out required');
   try{
-    const j=await(await fetch(API+'?action=schedule-save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:id,days,days2,start_time:start,end_time:end,grace_min:grace})})).json();
+    const j=await(await apiFetch('schedule-save',{method:'POST',body:JSON.stringify({user_id:id,days,days2,start_time:start,end_time:end,grace_min:grace})})).json();
     if(!j.ok)return toast(j.error||'Cannot save schedule');
     const before=_schedCache[id]?JSON.parse(JSON.stringify(_schedCache[id])):null;
     _schedCache[id]=j.row;

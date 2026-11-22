@@ -9,11 +9,11 @@ start "" "C:\xampp\xampp_start.exe"
 timeout /t 8 /nobreak >nul
 echo.
 echo Opening POS app...
-start "" "http://localhost/pos-inventory-management-system/index.html?v=36"
+start "" "http://localhost/pos-inventory-management-system/index.html?v=38"
 echo.
-echo   App:        http://localhost/pos-inventory-management-system/index.html?v=36
+echo   App:        http://localhost/pos-inventory-management-system/index.html?v=38
 echo   phpMyAdmin: http://localhost/phpmyadmin/index.php?route=/database/structure^&db=pos_inventory
-echo   Database:   pos_inventory  ^|  user: root  ^|  password: (blank)
+echo   Database:   pos_inventory  ^|  credentials: private POS-Server\config.local.php
 echo.
 echo Done. This window will close automatically.
 exit /b 0
