@@ -108,7 +108,7 @@ const API_QUERY = new URLSearchParams(location.search).get('api');
 if (API_QUERY) localStorage.setItem('sipos_api_url', API_QUERY);
 const API = IS_GH_PAGES
   ? (API_QUERY || window.POS_API_URL || localStorage.getItem('sipos_api_url') || 'api.php')
-  : (location.protocol === 'file:' ? 'http://localhost/daniels-pos/api.php' : 'api.php');
+  : (location.protocol === 'file:' ? 'http://localhost/pos-inventory-management-system/api.php' : 'api.php');
 const OFFLINE_KEY='sipos_offline_queue_v1';
 let DB=null, OFFLINE=false, _syncTimer=null, _syncing=false, _dirty=false;
 

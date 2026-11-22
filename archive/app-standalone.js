@@ -77,7 +77,7 @@ function toast(msg){const t=$('#toast'),tx=$('#toastTxt');tx.textContent=msg;t.c
 const hideToast=()=>{const t=$('#toast');if(t)t.classList.remove('show');clearTimeout(_toastTimer)};
 
 /* --- storage: MySQL via api.php (every change is a real SQL write) --- */
-const API = location.protocol==='file:' ? 'http://localhost/daniels-pos/api.php' : 'api.php';
+const API = location.protocol==='file:' ? 'http://localhost/pos-inventory-management-system/api.php' : 'api.php';
 const OFFLINE_KEY='sipos_offline_queue_v1';
 let DB=null, OFFLINE=false, _syncTimer=null, _syncing=false, _dirty=false;
 

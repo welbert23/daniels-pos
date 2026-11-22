@@ -10,10 +10,10 @@ Double-click **`app\start-pos.bat`**. It starts XAMPP (Apache + MySQL) and opens
 
 | Item | Address |
 |---|---|
-| App | `http://localhost/daniels-pos/index.html` |
+| App | `http://localhost/pos-inventory-management-system/index.html` |
 | phpMyAdmin | `http://localhost/phpmyadmin/index.php?route=/database/structure&db=daniels_pos` |
 
-> The launcher adds a cache-buster (`?v=31`). If you have an old tab open, press **Ctrl+F5**.
+> The launcher adds a cache-buster (`?v=32`). If you have an old tab open, press **Ctrl+F5**.
 
 ### Logins
 
@@ -119,7 +119,7 @@ Data lives in **XAMPP MySQL**, not in the project folder:
 | Database | `daniels_pos` |
 | MySQL user | `root` (blank password) |
 | Physical files | `C:\xampp\mysql\data\daniels_pos\` |
-| Web root (junction) | `C:\xampp\htdocs\daniels-pos` → `...\POS-System\app` |
+| Web root (junction) | `C:\xampp\htdocs\pos-inventory-management-system` → `...\POS-System\app` |
 | Viewer | **phpMyAdmin ↗** button in the POS topbar (superadmin) |
 
 Tables: `meta`, `users`, `categories`, `items`, `item_recipes`, `ingredients`, `customers`, `transactions`, `transaction_items`, `attendance`, `schedules`, `audit_log`.

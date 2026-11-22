@@ -15,15 +15,15 @@ Write-Host 'Starting XAMPP (Apache + MySQL)...'
 Start-Process 'C:\xampp\xampp_start.exe'
 Start-Sleep -Seconds 8
 
-Write-Host 'Starting Cloudflare HTTPS tunnel for /daniels-pos ...'
+Write-Host 'Starting Cloudflare HTTPS tunnel for /pos-inventory-management-system ...'
 Get-CimInstance Win32_Process -Filter "Name = 'cloudflared.exe'" -ErrorAction SilentlyContinue |
-    Where-Object { $_.CommandLine -match 'daniels-pos' } |
+    Where-Object { $_.CommandLine -match 'pos-inventory-management-system' } |
     ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
 Remove-Item $log, "$log.err" -ErrorAction SilentlyContinue
 
 $tunnel = Start-Process `
     -FilePath $cloudflared `
-    -ArgumentList @('tunnel', '--no-autoupdate', '--url', 'http://localhost/daniels-pos') `
+    -ArgumentList @('tunnel', '--no-autoupdate', '--url', 'http://localhost/pos-inventory-management-system') `
     -RedirectStandardOutput $log `
     -RedirectStandardError "$log.err" `
     -PassThru `
@@ -44,8 +44,8 @@ if (-not $url) {
     throw "Tunnel URL not found. Check: $log"
 }
 
-$apiUrl       = "$url/daniels-pos/api.php"
-$tunnelAppUrl = "$url/daniels-pos/index.html?v=31"
+$apiUrl       = "$url/pos-inventory-management-system/api.php"
+$tunnelAppUrl = "$url/pos-inventory-management-system/index.html?v=32"
 
 $apiUrl | Set-Content $apiFile -Encoding ASCII
 

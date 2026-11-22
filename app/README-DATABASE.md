@@ -20,7 +20,7 @@ All business data lives in **XAMPP MySQL** (`daniels_pos`). When you add, edit, 
 | User | `root` |
 | Password | *(blank)* |
 | Physical files | `C:\xampp\mysql\data\daniels_pos\` |
-| Web root | `C:\xampp\htdocs\daniels-pos` → junction to the **`app`** folder |
+| Web root | `C:\xampp\htdocs\pos-inventory-management-system` → junction to the **`app`** folder |
 
 > **Superadmin only** can see the DB controls: **↻ Reload DB**, **↑ Import local**, **phpMyAdmin ↗**, and the status chip. They are hidden from Client, Cashier, and Inventory; `refreshDB()` / `importLocal()` also have a `requireSuper()` guard even if called from the console.
 
@@ -76,7 +76,7 @@ The database remains your local MySQL. Server-side changes show up after a refre
 1. Open the **Desktop** `app\index.html` (double-click) — **not** the localhost URL. The old browser data is stored there.
 2. Log in as superadmin.
 3. Click **↑ Import local** in the topbar and confirm.
-4. You can now use either the Desktop file or `http://localhost/daniels-pos/index.html`.
+4. You can now use either the Desktop file or `http://localhost/pos-inventory-management-system/index.html`.
 
 Use **↻ Reload DB** to pull the latest rows from MySQL — for example, after editing something directly in phpMyAdmin. If you insert manually, close all POS tabs before clicking Reload so the full-state sync does not overwrite your row.
 
