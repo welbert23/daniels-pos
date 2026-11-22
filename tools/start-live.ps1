@@ -45,7 +45,7 @@ if (-not $url) {
 }
 
 $apiUrl       = "$url/daniels-pos/api.php"
-$tunnelAppUrl = "$url/daniels-pos/index.html?v=26"
+$tunnelAppUrl = "$url/daniels-pos/index.html?v=27"
 
 $apiUrl | Set-Content $apiFile -Encoding ASCII
 

@@ -58,7 +58,7 @@ input:focus{outline:none}
 .login-card:hover{transform:rotate(0)}
 .login-logo{width:60px;height:60px;border-radius:var(--r);background:var(--brand);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;transform:rotate(-4deg)}
 .login-logo svg{width:32px;height:32px}
-.login-card h1{text-align:center;font-family:var(--font-d);font-size:24px;line-height:1.08;text-transform:uppercase;letter-spacing:.01em}
+.login-card h1{text-align:center;font-family:var(--font-d);font-size:24px;line-height:1.08;text-transform:uppercase;letter-spacing:.01em;margin:0 0 22px}
 .login-card .sub{text-align:center;font-family:var(--font-m);color:var(--mut);font-size:11px;letter-spacing:.1em;margin:8px 0 22px;font-weight:700}
 .login-err{display:none;background:var(--danger-l);border:2.5px solid var(--ink);color:#B32016;font-family:var(--font-m);font-size:11px;padding:10px 13px;margin-bottom:14px;font-weight:700;box-shadow:3px 3px 0 rgba(20,17,10,.2)}
 .field{margin-bottom:14px}
