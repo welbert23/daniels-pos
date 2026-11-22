@@ -10,10 +10,10 @@ Double-click **`POS-Server\start-pos.bat`** from the private server folder. It s
 
 | Item | Address |
 |---|---|
-| App | `http://localhost/pos-inventory-management-system/index.html?v=39` |
+| App | `http://localhost/pos-inventory-management-system/index.html?v=40` |
 | phpMyAdmin | `http://localhost/phpmyadmin/index.php?route=/database/structure&db=pos_inventory` |
 
-> The launcher adds a cache-buster (`?v=39`). If you have an old tab open, press **Ctrl+F5**.
+> The launcher adds a cache-buster (`?v=40`). If you have an old tab open, press **Ctrl+F5**.
 
 ### Logins
 
@@ -43,7 +43,7 @@ GitHub Pages can only serve static files from `docs/`. PHP and MySQL cannot run 
 
   `https://welbert23.github.io/pos-inventory-management-system/?r=a1b2c3&api=<tunnel>`
 
-  The random `?r=` value only busts the browser/CDN cache. The `&api=` value is saved into that browser's localStorage on first open so the app can reach your local MySQL. The tunnel URL is **not** committed to the public repo. The shareable URL is saved to `app\live-url.txt` and copied to the clipboard. A manual `?api=<url>` still works and overrides the saved value.
+  The random `?r=` value only busts the browser/CDN cache. The `&api=` value is saved into that browser's localStorage on first open, then the address bar automatically becomes the short `https://welbert23.github.io/pos-inventory-management-system/`. The tunnel URL is **not** committed to the public repo. The short URL is saved to `app\live-url.txt` and copied to the clipboard; the seed URL is saved to `app\seed-url.txt`. Other devices need the seed URL once. A manual `?api=<url>` still works and overrides the saved value.
 
 Changes go to **MySQL on your PC**, so XAMPP must be running. Refresh the page or use **↻ Reload DB** (superadmin only) to see them.
 
@@ -93,7 +93,7 @@ POS-System/
 └── README.md     → This file
 ```
 
-`app\api-url.txt` and `app\live-url.txt` are generated, gitignored files. The public repo has no PHP; the API is served privately through the `pos-server` junction. The launchers (`start-pos.bat`, `start-live.bat`, `tools\start-live.ps1`) live in the private `POS-Server` repo.
+`app\api-url.txt` and `app\live-url.txt` are generated, gitignored files. The public repo has no PHP; the API is served privately through the `pos-server` junction. `seed-url.txt` is also generated and gitignored. The launchers (`start-pos.bat`, `start-live.bat`, `tools\start-live.ps1`) live in the private `POS-Server` repo.
 
 Design/Penpot files, old versions, PDFs, session notes, and screenshot/PDF scripts are archived outside the repo at `C:\Users\Admin\OneDrive\Desktop\POS-System-Archive\`.
 

@@ -108,6 +108,7 @@ const IS_LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/i.
 const IS_TUNNEL = /\.trycloudflare\.com$/i.test(location.hostname);
 const API_QUERY = new URLSearchParams(location.search).get('api');
 if (API_QUERY) localStorage.setItem('sipos_api_url', API_QUERY);
+if (IS_GH_PAGES) history.replaceState(null, '', location.pathname);
 const API = IS_GH_PAGES
   ? (API_QUERY || window.POS_API_URL || localStorage.getItem('sipos_api_url') || 'api.php')
   : IS_LOCAL
