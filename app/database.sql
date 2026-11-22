@@ -1,4 +1,4 @@
--- Daniel's Barbecue & Restaurant — POS database (XAMPP MySQL / MariaDB)
+-- Point of Sales System - POS database (XAMPP MySQL / MariaDB)
 -- Import via phpMyAdmin or: mysql -u root < database.sql
 
 CREATE DATABASE IF NOT EXISTS daniels_pos

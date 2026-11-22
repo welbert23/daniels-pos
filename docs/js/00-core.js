@@ -4,7 +4,7 @@
    ============================================================ */
 
 /* ============================================================
-   SALES & INVENTORY POS — Daniel's Barbecue & Restaurant
+   SALES & INVENTORY POS - Point of Sales System
    MySQL-backed, role-aware — index.html + styles.css + app.js
    ============================================================ */
 const DB_KEY='sipos_db_v2',SESSION_KEY='sipos_session_v1';

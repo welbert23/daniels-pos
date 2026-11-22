@@ -1,6 +1,6 @@
 
 /* ============================================================
-   DESIGN SYSTEM — DANIEL'S BARBECUE & RESTAURANT
+   DESIGN SYSTEM - POINT OF SALES SYSTEM
    NEO-BRUTALIST / STREET ENERGY
    ============================================================ */
 :root{
@@ -47,7 +47,7 @@ input:focus{outline:none}
 .bg-square{position:absolute;width:180px;height:180px;background:var(--brand);border:4px solid var(--ink);transform:rotate(12deg);top:-40px;right:-30px;box-shadow:10px 10px 0 rgba(20,17,10,.25)}
 .bg-ring{position:absolute;width:190px;height:190px;border:26px solid var(--ink);border-radius:50%;bottom:-60px;left:-40px}
 .bg-dot{position:absolute;width:70px;height:70px;background:var(--danger);border:4px solid var(--ink);border-radius:50%;bottom:90px;left:110px;box-shadow:5px 5px 0 rgba(20,17,10,.25)}
-.bg-stamp{position:absolute;width:130px;height:130px;background:var(--brand);border:4px solid var(--ink);transform:rotate(-15deg);top:50%;left:8%;margin-top:-65px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:44px;box-shadow:8px 8px 0 rgba(20,17,10,.3);opacity:.92}
+.bg-stamp{position:absolute;width:130px;height:130px;background:var(--brand);border:4px solid var(--ink);transform:rotate(-15deg);top:50%;left:8%;margin-top:-65px;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:38px;letter-spacing:.02em;box-shadow:8px 8px 0 rgba(20,17,10,.3);opacity:.92}
 .login-card{
   position:relative;z-index:1;width:400px;background:var(--surface);
   border:4px solid var(--ink);border-radius:var(--r);

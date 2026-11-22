@@ -1,7 +1,7 @@
 @echo off
-title Daniel's POS - Live (GitHub Pages + MySQL)
+title Point of Sales System - Live (GitHub Pages + MySQL)
 echo ============================================================
-echo   DANIEL'S BARBECUE POS - LIVE ACCESS
+echo   POINT OF SALES SYSTEM - LIVE ACCESS
 echo   GitHub Pages frontend + local MySQL
 echo   Updated: clean URL with auto API config (v2)
 echo ============================================================
