@@ -104,11 +104,17 @@ const hideToast=()=>{const t=$('#toast');if(t)t.classList.remove('show');clearTi
 
 /* --- storage: MySQL via api.php (every change is a real SQL write) --- */
 const IS_GH_PAGES = /\.github\.io$/i.test(location.hostname);
+const IS_LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/i.test(location.hostname);
+const IS_TUNNEL = /\.trycloudflare\.com$/i.test(location.hostname);
 const API_QUERY = new URLSearchParams(location.search).get('api');
 if (API_QUERY) localStorage.setItem('sipos_api_url', API_QUERY);
 const API = IS_GH_PAGES
   ? (API_QUERY || window.POS_API_URL || localStorage.getItem('sipos_api_url') || 'api.php')
-  : (location.protocol === 'file:' ? 'http://localhost/pos-inventory-management-system/api.php' : 'api.php');
+  : IS_LOCAL
+    ? 'http://localhost/pos-server/api.php'
+    : IS_TUNNEL
+      ? '/pos-server/api.php'
+      : 'api.php';
 const TOKEN_KEY = 'sipos_token_v1';
 function authToken(){return localStorage.getItem(TOKEN_KEY)||''}
 function authHeaders(extra={}){return Object.assign({'Content-Type':'application/json','X-POS-Token':authToken()},extra||{})}

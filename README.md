@@ -10,10 +10,10 @@ Double-click **`POS-Server\start-pos.bat`** from the private server folder. It s
 
 | Item | Address |
 |---|---|
-| App | `http://localhost/pos-inventory-management-system/index.html?v=38` |
+| App | `http://localhost/pos-inventory-management-system/index.html?v=39` |
 | phpMyAdmin | `http://localhost/phpmyadmin/index.php?route=/database/structure&db=pos_inventory` |
 
-> The launcher adds a cache-buster (`?v=38`). If you have an old tab open, press **Ctrl+F5**.
+> The launcher adds a cache-buster (`?v=39`). If you have an old tab open, press **Ctrl+F5**.
 
 ### Logins
 
@@ -36,7 +36,7 @@ The GitHub repository is **public**, and the static frontend is published with G
 
 **https://welbert23.github.io/pos-inventory-management-system/**
 
-GitHub Pages can only serve static files from `docs/`. PHP and MySQL cannot run there, so the real `api.php` stays on your PC in the **private** `pos-inventory-server` repo; the public repo only has a stub that requires the private file.
+GitHub Pages can only serve static files from `docs/`. PHP and MySQL cannot run there, so the real `api.php` stays on your PC in the **private** `pos-inventory-server` repo. The public frontend repo contains **no PHP at all**.
 
 - **Offline-first after sign-in:** open the Pages URL as-is. Sign in once while XAMPP/the tunnel is online; the token and session are cached, so later sessions can work from queued/local data. To move old browser data into MySQL, use **↑ Import local** from the Desktop `app\index.html`.
 - **Live MySQL:** double-click **`POS-Server\start-live.bat`**. It starts XAMPP and a Cloudflare tunnel, saves the API URL **only** to `POS-Server\api-url.txt`, rebuilds Pages with no embedded URL, then opens a URL like:
@@ -88,17 +88,16 @@ POS-System/
 │   ├── index.html          markup
 │   ├── styles.css          all CSS
 │   ├── js/                 16 JS files (15 feature modules + runtime API config)
-│   └── api.php             public stub -> private POS-Server\api.php
 ├── docs/         → Generated GitHub Pages site (no PHP/MySQL)
 ├── tools/        → build-pages.ps1 only
 └── README.md     → This file
 ```
 
-`app\api-url.txt` and `app\live-url.txt` are generated, gitignored files. The launchers (`start-pos.bat`, `start-live.bat`, `tools\start-live.ps1`) live in the private `POS-Server` repo.
+`app\api-url.txt` and `app\live-url.txt` are generated, gitignored files. The public repo has no PHP; the API is served privately through the `pos-server` junction. The launchers (`start-pos.bat`, `start-live.bat`, `tools\start-live.ps1`) live in the private `POS-Server` repo.
 
 Design/Penpot files, old versions, PDFs, session notes, and screenshot/PDF scripts are archived outside the repo at `C:\Users\Admin\OneDrive\Desktop\POS-System-Archive\`.
 
-Server/database files are in the private repo at `C:\Users\Admin\OneDrive\Desktop\New folder\POS-Server\` (GitHub: https://github.com/welbert23/pos-inventory-server). Keep it beside `POS-System` because the public stub requires `..\..\POS-Server\api.php`.
+Server/database files are in the private repo at `C:\Users\Admin\OneDrive\Desktop\New folder\POS-Server\` (GitHub: https://github.com/welbert23/pos-inventory-server). XAMPP serves this folder as `http://localhost/pos-server`, while the frontend is served as `http://localhost/pos-inventory-management-system`.
 
 ### JavaScript modules (`app/js/`)
 
@@ -132,7 +131,8 @@ Data lives in **XAMPP MySQL**, not in the project folder:
 | Database | `pos_inventory` |
 | MySQL user | `pos_app` (credentials in private `POS-Server\config.local.php`, gitignored) |
 | Physical files | `C:\xampp\mysql\data\pos_inventory\` |
-| Web root (junction) | `C:\xampp\htdocs\pos-inventory-management-system` → `...\POS-System\app` |
+| Web root (junction) | `C:\\xampp\\htdocs\\pos-inventory-management-system` → `...\\POS-System\\app` |
+| API root (junction) | `C:\\xampp\\htdocs\\pos-server` → `...\\POS-Server` |
 | Viewer | **phpMyAdmin ↗** button in the POS topbar (superadmin) |
 
 Tables: `attendance`, `audit_log`, `categories`, `customers`, `ingredients`, `item_recipes`, `items`, `meta`, `schedules`, `transaction_items`, `transactions`, `users`.
