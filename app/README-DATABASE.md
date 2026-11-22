@@ -1,4 +1,4 @@
-# Point of Sales System - MySQL Database Edition
+# Point of Sales Inventory Management System - MySQL Database Edition
 
 All business data lives in **XAMPP MySQL** (`daniels_pos`). When you add, edit, or delete something in the app, the change is immediately visible in **phpMyAdmin**.
 

@@ -1,4 +1,4 @@
-# Point of Sales System
+# Point of Sales Inventory Management System
 
 MySQL-backed POS, inventory, ingredients, attendance, schedules, and audit trail. The database is the source of truth — there is no hardcoded business data in the frontend.
 
@@ -13,7 +13,7 @@ Double-click **`app\start-pos.bat`**. It starts XAMPP (Apache + MySQL) and opens
 | App | `http://localhost/daniels-pos/index.html` |
 | phpMyAdmin | `http://localhost/phpmyadmin/index.php?route=/database/structure&db=daniels_pos` |
 
-> The launcher adds a cache-buster (`?v=24`). If you have an old tab open, press **Ctrl+F5**.
+> The launcher adds a cache-buster (`?v=25`). If you have an old tab open, press **Ctrl+F5**.
 
 ### Logins
 

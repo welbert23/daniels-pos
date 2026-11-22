@@ -1,5 +1,5 @@
 <?php
-/* Point of Sales System - MySQL bridge. Every CRUD action in the app runs real SQL here. */
+/* Point of Sales Inventory Management System - MySQL bridge. Every CRUD action in the app runs real SQL here. */
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
