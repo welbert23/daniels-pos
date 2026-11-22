@@ -44,7 +44,7 @@ if ($apiUrl) {
 }
 $indexPath = Join-Path $docs 'index.html'
 $html = [IO.File]::ReadAllText($indexPath, [System.Text.Encoding]::UTF8)
-$html = $html.Replace('js/00-api-url.js?v=25', "js/00-api-url.js?v=$hash")
+$html = $html.Replace('js/00-api-url.js?v=26', "js/00-api-url.js?v=$hash")
 [IO.File]::WriteAllText($indexPath, $html, [System.Text.UTF8Encoding]::new($false))
 
 New-Item -ItemType File -Path (Join-Path $docs '.nojekyll') -Force | Out-Null

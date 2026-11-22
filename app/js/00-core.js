@@ -4,7 +4,7 @@
    ============================================================ */
 
 /* ============================================================
-   SALES & INVENTORY POS - Point of Sales Inventory Management System
+   SALES & INVENTORY POS - Point of Sales & Inventory Management System
    MySQL-backed, role-aware — index.html + styles.css + app.js
    ============================================================ */
 const DB_KEY='sipos_db_v2',SESSION_KEY='sipos_session_v1';

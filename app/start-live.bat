@@ -1,7 +1,7 @@
 @echo off
-title Point of Sales Inventory Management System - Live (GitHub Pages + MySQL)
+title Point of Sales ^& Inventory Management System - Live (GitHub Pages + MySQL)
 echo ============================================================
-echo   POINT OF SALES INVENTORY MANAGEMENT SYSTEM - LIVE ACCESS
+echo   POINT OF SALES ^& INVENTORY MANAGEMENT SYSTEM - LIVE ACCESS
 echo   GitHub Pages frontend + local MySQL
 echo   Updated: clean URL with auto API config (v2)
 echo ============================================================
