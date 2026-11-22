@@ -1,6 +1,6 @@
 # Point of Sales & Inventory Management System - MySQL Database Edition
 
-All business data lives in **XAMPP MySQL** (`daniels_pos`). When you add, edit, or delete something in the app, the change is immediately visible in **phpMyAdmin**.
+All business data lives in **XAMPP MySQL** (`pos_inventory`). When you add, edit, or delete something in the app, the change is immediately visible in **phpMyAdmin**.
 
 > There is no hardcoded business data in the frontend. Users, categories, items, recipes, ingredients, customers, and transactions all come from MySQL. Initial users/categories are defined in `database.sql`; old localStorage data is imported **explicitly** with **↑ Import local**.
 
@@ -11,15 +11,15 @@ All business data lives in **XAMPP MySQL** (`daniels_pos`). When you add, edit, 
 1. Double-click `start-pos.bat` — it starts XAMPP Apache + MySQL and opens the app.
 2. Log in as **superadmin**.
 3. Click **phpMyAdmin ↗** in the topbar, or open:
-   `http://localhost/phpmyadmin/index.php?route=/database/structure&db=daniels_pos`
+   `http://localhost/phpmyadmin/index.php?route=/database/structure&db=pos_inventory`
 
 | Item | Value |
 |---|---|
-| Database | `daniels_pos` |
+| Database | `pos_inventory` |
 | Host | `127.0.0.1` |
 | User | `root` |
 | Password | *(blank)* |
-| Physical files | `C:\xampp\mysql\data\daniels_pos\` |
+| Physical files | `C:\xampp\mysql\data\pos_inventory\` |
 | Web root | `C:\xampp\htdocs\pos-inventory-management-system` → junction to the **`app`** folder |
 
 > **Superadmin only** can see the DB controls: **↻ Reload DB**, **↑ Import local**, **phpMyAdmin ↗**, and the status chip. They are hidden from Client, Cashier, and Inventory; `refreshDB()` / `importLocal()` also have a `requireSuper()` guard even if called from the console.
@@ -198,8 +198,8 @@ SELECT s.user_id, u.name, u.role,
        s.days    AS week1,
        s.days2   AS week2,
        s.start_time, s.end_time, s.grace_min
-FROM daniels_pos.schedules s
-JOIN daniels_pos.users u ON u.id = s.user_id;
+FROM pos_inventory.schedules s
+JOIN pos_inventory.users u ON u.id = s.user_id;
 ```
 
 Every schedule change is written to the Activity Log (`EDIT` · `schedule`) with before/after values.

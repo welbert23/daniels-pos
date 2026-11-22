@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=34">
+<link rel="stylesheet" href="styles.css?v=35">
 </head>
 <body>
 
@@ -60,7 +60,7 @@
       <div id="dbTools" style="display:none;gap:8px;align-items:center">
         <button class="dbrefresh" onclick="refreshDB()" title="Reload data from MySQL">↻ Reload DB</button>
         <button class="dbrefresh" onclick="importLocal()" title="Push this browser's saved data into MySQL">↑ Import local</button>
-        <a class="dbrefresh" href="http://localhost/phpmyadmin/index.php?route=/database/structure&amp;db=daniels_pos" target="_blank" rel="noopener" title="Open phpMyAdmin">phpMyAdmin ↗</a>
+        <a class="dbrefresh" href="http://localhost/phpmyadmin/index.php?route=/database/structure&amp;db=pos_inventory" target="_blank" rel="noopener" title="Open phpMyAdmin">phpMyAdmin ↗</a>
         <div class="dbchip saving" id="dbChip"><i></i><span>Connecting…</span></div>
       </div>
       <div class="clock" id="clock"></div>
@@ -73,21 +73,21 @@
 <div class="overlay" id="overlay"><div class="modal" id="modalBox"></div></div>
 <div id="printArea" style="display:none"></div>
 <div class="toast" id="toast"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg><span id="toastTxt"></span></div>
-<script src="js/00-api-url.js?v=34"></script>
-<script src="js/00-core.js?v=34"></script>
-<script src="js/10-router-auth.js?v=34"></script>
-<script src="js/20-dashboard.js?v=34"></script>
-<script src="js/30-pos.js?v=34"></script>
-<script src="js/40-inventory.js?v=34"></script>
-<script src="js/45-recipes.js?v=34"></script>
-<script src="js/50-ingredients.js?v=34"></script>
-<script src="js/60-sales.js?v=34"></script>
-<script src="js/70-customers.js?v=34"></script>
-<script src="js/80-attendance.js?v=34"></script>
-<script src="js/85-logs.js?v=34"></script>
-<script src="js/90-reports.js?v=34"></script>
-<script src="js/95-users.js?v=34"></script>
-<script src="js/96-modal.js?v=34"></script>
-<script src="js/99-init.js?v=34"></script>
+<script src="js/00-api-url.js?v=35"></script>
+<script src="js/00-core.js?v=35"></script>
+<script src="js/10-router-auth.js?v=35"></script>
+<script src="js/20-dashboard.js?v=35"></script>
+<script src="js/30-pos.js?v=35"></script>
+<script src="js/40-inventory.js?v=35"></script>
+<script src="js/45-recipes.js?v=35"></script>
+<script src="js/50-ingredients.js?v=35"></script>
+<script src="js/60-sales.js?v=35"></script>
+<script src="js/70-customers.js?v=35"></script>
+<script src="js/80-attendance.js?v=35"></script>
+<script src="js/85-logs.js?v=35"></script>
+<script src="js/90-reports.js?v=35"></script>
+<script src="js/95-users.js?v=35"></script>
+<script src="js/96-modal.js?v=35"></script>
+<script src="js/99-init.js?v=35"></script>
 </body>
 </html>

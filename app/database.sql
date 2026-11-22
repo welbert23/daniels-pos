@@ -1,9 +1,9 @@
 -- Point of Sales & Inventory Management System - POS database (XAMPP MySQL / MariaDB)
 -- Import via phpMyAdmin or: mysql -u root < database.sql
 
-CREATE DATABASE IF NOT EXISTS daniels_pos
+CREATE DATABASE IF NOT EXISTS pos_inventory
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE daniels_pos;
+USE pos_inventory;
 
 CREATE TABLE IF NOT EXISTS meta (
   id   TINYINT PRIMARY KEY,

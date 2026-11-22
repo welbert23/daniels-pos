@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 $DB_HOST = '127.0.0.1';
-$DB_NAME = 'daniels_pos';
+$DB_NAME = 'pos_inventory';
 $DB_USER = 'root';
 $DB_PASS = '';
 
