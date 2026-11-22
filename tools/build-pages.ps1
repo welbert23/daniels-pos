@@ -28,7 +28,7 @@ $config = 'window.POS_API_URL = "";'
 
 $indexPath = Join-Path $docs 'index.html'
 $html = [IO.File]::ReadAllText($indexPath, [System.Text.Encoding]::UTF8)
-$html = [regex]::Replace($html, 'js/00-api-url\.js\?v=[^"\']+', 'js/00-api-url.js?v=public')
+$html = [regex]::Replace($html, 'js/00-api-url\.js\?v=[^"]+', 'js/00-api-url.js?v=public')
 [IO.File]::WriteAllText($indexPath, $html, [System.Text.UTF8Encoding]::new($false))
 
 New-Item -ItemType File -Path (Join-Path $docs '.nojekyll') -Force | Out-Null
