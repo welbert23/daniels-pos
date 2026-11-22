@@ -81,12 +81,12 @@ POS-System/
 │   ├── start-pos.bat       XAMPP + browser launcher
 │   ├── start-live.bat      XAMPP + public HTTPS tunnel launcher
 │   └── README-DATABASE.md  detailed database docs
-├── docs/         → PDF modules, session notes, and generated GitHub Pages site (no PHP/MySQL)
-├── design/       → Penpot UX/UI files, screenshots, design zips
-├── tools/        → Screenshot/PDF scripts, start-live.ps1, build-pages.ps1
-├── archive/      → Old/unused versions (index-design2.html, index-standalone.html, app-standalone.js)
+├── docs/         → Generated GitHub Pages site (no PHP/MySQL)
+├── tools/        → start-live.ps1, build-pages.ps1
 └── README.md     → This file
 ```
+
+Design/Penpot files, old versions, PDFs, session notes, and screenshot/PDF scripts are archived outside the repo at `C:\Users\Admin\OneDrive\Desktop\POS-System-Archive\`.
 
 ### JavaScript modules (`app/js/`)
 
@@ -158,7 +158,7 @@ Close all POS tabs first, insert the row in phpMyAdmin, then log in as superadmi
 | `Database has no users` | Import `app\database.sql` in phpMyAdmin. |
 | No schedule flags appearing | No schedule has been set yet; set one as Superadmin/Client. |
 | `No partitioning defined` in phpMyAdmin | Normal informational text — not an error. |
-| Old `Penpot-UXUI` folder cannot be deleted | Wait for a PC restart. Its contents were already copied to `design\Penpot-UXUI` and the old folder is hidden. |
+
 
 ---
 

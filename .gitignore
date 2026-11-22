@@ -5,8 +5,6 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Empty leftover folder at project root (already copied to design/Penpot-UXUI)
-/Penpot-UXUI/
 
 # Local-only environment files
 .env
