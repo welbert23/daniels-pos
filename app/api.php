@@ -26,6 +26,13 @@ try {
     exit;
 }
 
+try {
+    $hasNote = $pdo->query("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='transactions' AND COLUMN_NAME='note'")->fetchColumn();
+    if (!$hasNote) {
+        $pdo->exec("ALTER TABLE transactions ADD COLUMN note VARCHAR(500) NOT NULL DEFAULT '' AFTER status");
+    }
+} catch (Throwable $e) {}
+
 function respond(array $data): void
 {
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -146,6 +153,7 @@ if ($action === 'bootstrap') {
             'customer'   => $r['customer'],
             'customerId' => $r['customer_id'],
             'orderType'  => $r['order_type'],
+            'note'       => $r['note'],
             'status'     => $r['status'],
         ];
     }
@@ -271,6 +279,7 @@ if ($action === 'save') {
             'customer'    => fn($v) => str($v, 150),
             'customer_id' => fn($v) => str($v, 40),
             'order_type'  => fn($v) => str($v, 40),
+            'note'        => fn($v) => str($v, 500),
             'status'      => fn($v) => str($v, 30),
         ]);
 

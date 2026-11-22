@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   customer    VARCHAR(150) NOT NULL DEFAULT '',
   customer_id VARCHAR(40) NOT NULL DEFAULT '',
   order_type  VARCHAR(40) NOT NULL DEFAULT 'Dine-in',
+  note        VARCHAR(500) NOT NULL DEFAULT '',
   status      VARCHAR(30) NOT NULL DEFAULT 'completed',
   sort_order  INT NOT NULL DEFAULT 0,
   UNIQUE KEY uq_transactions_ref (ref)

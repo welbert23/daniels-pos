@@ -10,7 +10,7 @@ function renderSales(){
   const db=load(),srvOps=CAN.salesOps(me().role);let list=[...db.transactions].sort((a,b)=>new Date(b.date)-new Date(a.date));
   if(salesFilter==='today')list=list.filter(t=>t.date.slice(0,10)===todayStr());
   else if(salesFilter!=='all')list=list.filter(t=>t.status===salesFilter);
-  if(salesQ)list=list.filter(t=>t.ref.toLowerCase().includes(salesQ)||(t.customer||'').toLowerCase().includes(salesQ));
+  if(salesQ)list=list.filter(t=>t.ref.toLowerCase().includes(salesQ)||(t.customer||'').toLowerCase().includes(salesQ)||(t.note||'').toLowerCase().includes(salesQ));
   const done=db.transactions.filter(t=>t.status==='completed');
   const todaySales=done.filter(t=>t.date.slice(0,10)===todayStr()).reduce((s,t)=>s+t.total,0);
   $('#content').innerHTML=`
@@ -31,5 +31,5 @@ function renderSales(){
 function viewSale(id){const db=load(),t=db.transactions.find(x=>x.id===id);if(t)showReceiptModal(t)}
 function voidSale(id){const db=load(),t=db.transactions.find(x=>x.id===id);openModal(`<h3>Void this order?</h3><div class="msub">${t.ref} &middot; PHP ${money0(t.total)} by ${esc(cashierName(t,db))}. Food is already prepared — menu and ingredient stocks are NOT returned; only this sale is removed from totals.</div><div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Keep</button><button class="btn btn-danger" onclick="confirmVoid('${id}')">Void Order</button></div>`)}
 function confirmVoid(id){const db=load(),t=db.transactions.find(x=>x.id===id),before={status:t.status,total:t.total};t.status='cancelled';save(db);logAction('void','transaction',id,t.ref+' · PHP '+money0(t.total),before,{status:t.status,total:t.total});closeModal();renderSales();toast('Order voided — no stock returned')}
-function exportSalesCSV(){const db=load();const rows=[['Ref','Date','Cashier','Customer','OrderType','Items','Total','Status']];db.transactions.forEach(t=>rows.push([t.ref,t.date,cashierName(t,db),t.customer||'Walk-in',t.orderType||'Dine-in',t.items.reduce((s,i)=>s+i.qty,0),t.total,t.status]));const csv=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.download='sales-'+todayStr()+'.csv';a.click();toast('CSV exported')}
+function exportSalesCSV(){const db=load();const rows=[['Ref','Date','Cashier','Customer','OrderType','Items','Total','Status','Note']];db.transactions.forEach(t=>rows.push([t.ref,t.date,cashierName(t,db),t.customer||'Walk-in',t.orderType||'Dine-in',t.items.reduce((s,i)=>s+i.qty,0),t.total,t.status,t.note||'']));const csv=rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.download='sales-'+todayStr()+'.csv';a.click();toast('CSV exported')}
 

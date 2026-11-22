@@ -5,7 +5,7 @@
 /* ============================================================
    POS
    ============================================================ */
-let cart=[],cartDiscount=0,cartCustomer='',orderType='Dine-in',catFilter='All',posQ='';
+let cart=[],cartDiscount=0,cartCustomer='',cartNote='',orderType='Dine-in',catFilter='All',posQ='';
 function cartTotals(){const sub=cart.reduce((s,c)=>s+c.price*c.qty,0);let disc=Math.round(sub*cartDiscount*100)/100;if(disc>sub)disc=sub;return{sub,disc,total:Math.round((sub-disc)*100)/100}}
 function renderPOS(){
   const db=load(),items=db.items.filter(i=>i.stock>0);
@@ -42,7 +42,7 @@ function renderPOS(){
 function addCart(id){if(!CAN.usePOS(me().role))return toast('No POS access');const db=load(),it=db.items.find(i=>i.id===id);if(!it||it.stock<=0)return toast('Out of stock');const has=cart.find(c=>c.id===id);if(has){if(has.qty+1>it.stock)return toast('Only '+it.stock+' available');has.qty++}else cart.push({id,name:it.name,price:it.price,qty:1});renderCart()}
 function setQty(id,d){const db=load(),c=cart.find(x=>x.id===id),it=db.items.find(i=>i.id===id);if(!c)return;c.qty+=d;if(c.qty<=0)cart=cart.filter(x=>x.id!==id);else if(it&&c.qty>it.stock){c.qty=it.stock;toast('Max stock: '+it.stock)}renderCart()}
 function rmCart(id){cart=cart.filter(x=>x.id!==id);renderCart()}
-function clearCart(){cart=[];cartDiscount=0;cartCustomer='';renderCart()}
+function clearCart(){cart=[];cartDiscount=0;cartCustomer='';cartNote='';renderCart()}
 function renderCart(){
   const body=$('#cartBody'),foot=$('#cartFoot');if(!body)return;
   const db=load();
@@ -52,6 +52,7 @@ function renderCart(){
   foot.innerHTML=`
     <div class="ot-row">${['Dine-in','Take-out','Delivery'].map(ot=>`<div class="ot-btn ${orderType===ot?'active':''}" onclick="orderType='${ot}';renderCart()">${ot}</div>`).join('')}</div>
     <div class="cust-row"><span class="clbl">Customer</span><select id="custSel" onchange="cartCustomer=this.value"><option value="">Walk-in</option>${db.customers.map(c=>`<option value="${c.id}" ${cartCustomer===c.id?'selected':''}>${esc(c.name)}${c.phone?' \u00b7 '+esc(c.phone):''}</option>`).join('')}</select></div>
+    <div class="note-row"><textarea id="cartNote" maxlength="500" placeholder="Order note (optional)" oninput="cartNote=this.value"></textarea></div>
     <div class="sum-row"><span>Subtotal</span><span class="ph">PHP ${money0(t.sub)}</span></div>
     <div class="disc-row"><select id="discSel" onchange="cartDiscount=parseFloat(this.value||0);renderCart()"><option value="0">No discount</option><option value="0.05">5% off</option><option value="0.1">10% off</option><option value="0.15">15% off</option><option value="0.2">20% off</option><option value="0.25">25% off</option></select>${cartDiscount?`<button class="clear" onclick="cartDiscount=0;renderCart()">remove</button>`:''}</div>
     <div class="sum-row"><span>Discount</span><span style="color:var(--ok)">- PHP ${money0(t.disc)}</span></div>
@@ -62,6 +63,7 @@ function renderCart(){
     <div class="change-row"><span>Change</span><span id="changeTxt">—</span></div>
     <button class="checkout-btn" ${cart.length?'':'disabled'} onclick="checkout()">CHECKOUT — PHP ${money0(t.total)}</button>`;
   if(cartDiscount){const sel=$('#discSel');if(sel){sel.value=String(cartDiscount);}}
+  const nt=$('#cartNote');if(nt)nt.value=cartNote;
 }
 function quickCash(amt){const i=$('#cashInput');if(i){i.value=amt.toFixed(2);updateChange();i.focus()}}
 function updateChange(){const t=cartTotals(),paid=parseFloat($('#cashInput')?.value)||0,el=$('#changeTxt');if(el)el.textContent=paid>=t.total?`PHP ${money0(paid-t.total)}`:'—'}
@@ -95,9 +97,9 @@ function checkout(){
       if(avail<need)return toast('Not enough '+r.name+' ('+qty(avail)+' '+(batches[0]?.unit||'')+' left)');
     }
   }
-  const trx={id:uid(),ref:refNo(),date:new Date().toISOString(),items:cart.map(c=>({name:c.name,qty:c.qty,price:c.price,line:0})),subtotal:t.sub,discount:t.disc,total:t.total,payment:paid,change:paid-t.total,cashier:me().name,cashierId:me().id,customer:customer?.name,customerId:customer?.id,orderType,status:'completed'};
+  const trx={id:uid(),ref:refNo(),date:new Date().toISOString(),items:cart.map(c=>({name:c.name,qty:c.qty,price:c.price,line:0})),subtotal:t.sub,discount:t.disc,total:t.total,payment:paid,change:paid-t.total,cashier:me().name,cashierId:me().id,customer:customer?.name,customerId:customer?.id,orderType,note:cartNote.trim(),status:'completed'};
   cart.forEach(c=>{const it=db.items.find(i=>i.id===c.id);if(it)it.stock=Math.max(0,it.stock-c.qty);for(const r of (it&&it.recipe)||[])deductIngredient(db,r.name,r.qty*c.qty)});
-  db.transactions.push(trx);save(db);logAction('add','transaction',trx.id,trx.ref+' · PHP '+money0(trx.total),null,{ref:trx.ref,total:trx.total,items:trx.items});cart=[];cartDiscount=0;cartCustomer='';renderCart();renderNav();showReceiptModal(trx);toast('Order completed — '+trx.ref);
+  db.transactions.push(trx);save(db);logAction('add','transaction',trx.id,trx.ref+' · PHP '+money0(trx.total),null,{ref:trx.ref,total:trx.total,items:trx.items});cart=[];cartDiscount=0;cartCustomer='';cartNote='';renderCart();renderNav();showReceiptModal(trx);toast('Order completed — '+trx.ref);
 }
 
 /* --- receipt --- */
@@ -106,7 +108,7 @@ function showReceiptModal(t){
   openModal(`<h3>${t.status==='cancelled'?'Voided Order':'Order Receipt'}</h3><div class="msub">${t.ref}</div>
     <div class="receipt" id="rcArea">
       <div class="rc"><b>DANIEL'S BARBECUE & RESTAURANT</b><div>Fast Food Restaurant &middot; Cabitehan Road, Cabuyao, Laguna</div><div>Tel: 0916 989 583</div></div>
-      <div style="font-size:10.5px;margin-bottom:6px"><div>Ref: <b>${t.ref}</b> &nbsp; ${fmtDT(t.date)}</div><div>Cashier: ${esc(cashierName(t,db))}</div><div>Order: ${esc(t.orderType||'Dine-in')}</div>${t.customer?`<div>Customer: ${esc(t.customer)}</div>`:''}${t.status==='cancelled'?'<div style="color:#DC2626;font-weight:bold">VOIDED</div>':''}</div>
+      <div style="font-size:10.5px;margin-bottom:6px"><div>Ref: <b>${t.ref}</b> &nbsp; ${fmtDT(t.date)}</div><div>Cashier: ${esc(cashierName(t,db))}</div><div>Order: ${esc(t.orderType||'Dine-in')}</div>${t.customer?`<div>Customer: ${esc(t.customer)}</div>`:''}${t.note?`<div>Note: ${esc(t.note)}</div>`:''}${t.status==='cancelled'?'<div style="color:#DC2626;font-weight:bold">VOIDED</div>':''}</div>
       <table><tr><th style="text-align:left">Item</th><th>Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Amount</th></tr>${rows}</table>
       <div class="tot"><div class="trow"><span>Subtotal</span><span>PHP ${money0(t.subtotal)}</span></div>${t.discount?`<div class="trow"><span>Discount</span><span>- PHP ${money0(t.discount)}</span></div>`:''}<div class="trow" style="font-weight:bold;font-size:12px"><span>TOTAL</span><span>PHP ${money0(t.total)}</span></div>${t.status==='completed'?`<div class="trow"><span>Cash</span><span>PHP ${money0(t.payment)}</span></div><div class="trow"><span>Change</span><span>PHP ${money0(t.change)}</span></div>`:''}</div>
       <div class="rc" style="border:none;padding-top:6px;margin-bottom:0"><div style="font-size:9px">Thank you for dining with us!</div></div>
