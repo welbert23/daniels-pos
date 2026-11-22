@@ -12,4 +12,5 @@ echo The browser will open automatically with the LIVE URL.
 echo.
 powershell -ExecutionPolicy Bypass -NoProfile -File "%~dp0..\tools\start-live.ps1"
 echo.
-pause
+echo Done. This window will close automatically.
+exit /b 0

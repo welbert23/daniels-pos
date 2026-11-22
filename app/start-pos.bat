@@ -15,5 +15,5 @@ echo   App:        http://localhost/daniels-pos/index.html?v=31
 echo   phpMyAdmin: http://localhost/phpmyadmin/index.php?route=/database/structure^&db=daniels_pos
 echo   Database:   daniels_pos  ^|  user: root  ^|  password: (blank)
 echo.
-echo You can close this window once the app opens.
-timeout /t 5 /nobreak >nul
+echo Done. This window will close automatically.
+exit /b 0
