@@ -58,5 +58,5 @@ async function doLogin(){
     if(err){err.style.display='block';err.textContent=e.name==='SessionExpired'?'Session expired - try again.':(e.message||'Login failed.')}
   }
 }
-function doLogout(){localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(SESSION_KEY);syncDbTools();$('#app').style.display='none';$('#login').style.display='flex';$('#logUser').value='';$('#logPass').value='';$('#loginErr').style.display='none';current='dashboard'}document.addEventListener('keydown',e=>{if(e.key==='Enter'&&getComputedStyle($('#login')).display!=='none'&&document.activeElement.id?.startsWith('log'))doLogin()});
+async function doLogout(){try{await apiFetch('logout',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})}catch(e){}localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(SESSION_KEY);syncDbTools();$('#app').style.display='none';$('#login').style.display='flex';$('#logUser').value='';$('#logPass').value='';$('#loginErr').style.display='none';current='dashboard'}document.addEventListener('keydown',e=>{if(e.key==='Enter'&&getComputedStyle($('#login')).display!=='none'&&document.activeElement.id?.startsWith('log'))doLogin()});
 

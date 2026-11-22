@@ -10,10 +10,10 @@ Double-click **`POS-Server\start-pos.bat`** from the private server folder. It s
 
 | Item | Address |
 |---|---|
-| App | `http://localhost/pos-inventory-management-system/index.html?v=40` |
+| App | `http://localhost/pos-inventory-management-system/index.html?v=41` |
 | phpMyAdmin | `http://localhost/phpmyadmin/index.php?route=/database/structure&db=pos_inventory` |
 
-> The launcher adds a cache-buster (`?v=40`). If you have an old tab open, press **Ctrl+F5**.
+> The launcher adds a cache-buster (`?v=41`). If you have an old tab open, press **Ctrl+F5**.
 
 ### Logins
 
@@ -39,6 +39,7 @@ The GitHub repository is **public**, and the static frontend is published with G
 GitHub Pages can only serve static files from `docs/`. PHP and MySQL cannot run there, so the real `api.php` stays on your PC in the **private** `pos-inventory-server` repo. The public frontend repo contains **no PHP at all**.
 
 - **Offline-first after sign-in:** open the Pages URL as-is. Sign in once while XAMPP/the tunnel is online; the token and session are cached, so later sessions can work from queued/local data. To move old browser data into MySQL, use **↑ Import local** from the Desktop `app\index.html`.
+- **Security:** login is rate-limited (5 failed attempts per 15 minutes), **Log out** revokes the token on the server, and changing a password signs out that user's other sessions. `file://` access is restricted to the import-related actions and can be disabled in private `config.local.php` with `allow_file_origin = false`.
 - **Live MySQL:** double-click **`POS-Server\start-live.bat`**. It starts XAMPP and a Cloudflare tunnel, saves the API URL **only** to `POS-Server\api-url.txt`, rebuilds Pages with no embedded URL, then opens a URL like:
 
   `https://welbert23.github.io/pos-inventory-management-system/?r=a1b2c3&api=<tunnel>`
