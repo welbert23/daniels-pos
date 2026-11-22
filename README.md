@@ -13,7 +13,7 @@ Double-click **`app\start-pos.bat`**. It starts XAMPP (Apache + MySQL) and opens
 | App | `http://localhost/pos-inventory-management-system/index.html` |
 | phpMyAdmin | `http://localhost/phpmyadmin/index.php?route=/database/structure&db=daniels_pos` |
 
-> The launcher adds a cache-buster (`?v=33`). If you have an old tab open, press **Ctrl+F5**.
+> The launcher adds a cache-buster (`?v=34`). If you have an old tab open, press **Ctrl+F5**.
 
 ### Logins
 
