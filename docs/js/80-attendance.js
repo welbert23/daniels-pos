@@ -9,7 +9,7 @@ const PUNCH_LABEL={time_in:'TIME IN',lunch_out:'LUNCH OUT',lunch_in:'LUNCH IN',c
 const ATT_STATUS={in:'ON DUTY',lunch:'LUNCH BREAK',back:'BACK FROM LUNCH',coffee:'COFFEE BREAK',back2:'BACK FROM COFFEE',done:'DUTY DONE'};
 const ATT_SHORT={in:'IN',lunch:'LUNCH',back:'BACK',coffee:'COFFEE',back2:'BACK',done:'DONE'};
 const DAY_LIST=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const SCHEDULABLE=r=>r==='cashier'||r==='inventory'||r==='staff';
+const SCHEDULABLE=r=>r==='cashier'||r==='inventory';
 let attDate=todayStr(),_schedCache={};
 function localStamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`}
 function fmtClock(s){const m=String(s||'').match(/(\d{2}):(\d{2})/);if(!m)return '—';let h=+m[1];const ap=h>=12?'PM':'AM';h=h%12||12;return `${h}:${m[2]} ${ap}`}

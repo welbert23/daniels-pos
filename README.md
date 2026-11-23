@@ -26,8 +26,6 @@ Accounts live in MySQL with hashed passwords. Credentials are **not** listed in 
 | **Cashier** | POS only; view-only inventory/ingredients/time in-out |
 | **Inventory** | Add/edit inventory & ingredients, **no delete**, no POS |
 
-> The legacy `staff` account is treated as **Cashier**.
-
 ---
 
 ## Live access from other devices

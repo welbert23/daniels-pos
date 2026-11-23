@@ -8,11 +8,11 @@
    MySQL-backed, role-aware — index.html + styles.css + app.js
    ============================================================ */
 const DB_KEY='sipos_db_v2',SESSION_KEY='sipos_session_v1';
-const ROLE_LABEL={superadmin:'Superadmin',client:'Client',cashier:'Cashier',inventory:'Inventory',staff:'Cashier'};
+const ROLE_LABEL={superadmin:'Superadmin',client:'Client',cashier:'Cashier',inventory:'Inventory'};
 const CAN={
   manageUsers:r=>r==='superadmin',
   viewReports:r=>r==='superadmin'||r==='client',
-  usePOS:r=>r==='superadmin'||r==='client'||r==='cashier'||r==='staff',
+  usePOS:r=>r==='superadmin'||r==='client'||r==='cashier',
   salesOps:r=>r==='superadmin'||r==='client',
   manageSchedules:r=>r==='superadmin'||r==='client',
   editStock:r=>r==='superadmin'||r==='client'||r==='inventory',
