@@ -36,7 +36,7 @@ function go(k){hideToast();if(k==='pos'&&!CAN.usePOS(me().role))k='dashboard';if
 async function doLogin(){
   const u=$('#logUser').value.trim(),p=$('#logPass').value.trim(),err=$('#loginErr');
   if(err){err.style.display='none'}
-  if(!u||!p){if(err){err.style.display='block';err.textContent='Username at password required.'}return}
+  if(!u||!p){if(err){err.style.display='block';err.textContent='Username and password are required.'}return}
   try{
     const r=await apiFetch('login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
     const j=await r.json();

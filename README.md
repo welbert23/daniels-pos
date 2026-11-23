@@ -10,10 +10,10 @@ Double-click **`POS-Server\start-pos.bat`** from the private server folder. It s
 
 | Item | Address |
 |---|---|
-| App | `http://localhost/pos-inventory-management-system/index.html?v=41` |
+| App | `http://localhost/pos-inventory-management-system/index.html?v=44` |
 | phpMyAdmin | `http://localhost/phpmyadmin/index.php?route=/database/structure&db=pos_inventory` |
 
-> The launcher adds a cache-buster (`?v=41`). If you have an old tab open, press **Ctrl+F5**.
+> The launcher adds a cache-buster (`?v=44`). If you have an old tab open, press **Ctrl+F5**.
 
 ### Logins
 
@@ -98,7 +98,7 @@ POS-System/
 
 Design/Penpot files, old versions, PDFs, session notes, and screenshot/PDF scripts are archived outside the repo at `C:\Users\Admin\OneDrive\Desktop\POS-System-Archive\`.
 
-Server/database files are in the private repo at `C:\Users\Admin\OneDrive\Desktop\New folder\POS-Server\` (GitHub: https://github.com/welbert23/pos-inventory-server). XAMPP serves this folder as `http://localhost/pos-server`, while the frontend is served as `http://localhost/pos-inventory-management-system`.
+Server/database files are in the private repo at `C:\Users\Admin\OneDrive\Desktop\POS System\POS-Server\` (GitHub: https://github.com/welbert23/pos-inventory-server). XAMPP serves this folder as `http://localhost/pos-server`, while the frontend is served as `http://localhost/pos-inventory-management-system`.
 
 ### JavaScript modules (`app/js/`)
 
