@@ -105,16 +105,33 @@ function checkout(){
 /* --- receipt --- */
 function showReceiptModal(t){
   const db=load(),rows=t.items.map(i=>`<tr><td>${esc(i.name)}</td><td class="num">${i.qty}</td><td class="num" style="text-align:right">${money0(i.price)}</td><td class="num" style="text-align:right">${money0(i.qty*i.price)}</td></tr>`).join('');
+  const krows=t.items.map(i=>`<tr><td>${esc(i.name)}</td><td class="num">${i.qty}</td></tr>`).join('');
+  const note=String(t.note||'').trim();
+  const knote=note?`<div class="kc-note"><b>ORDER NOTE</b><div>${esc(note).replace(/\n/g,'<br>')}</div></div>`:`<div class="kc-note empty"><b>ORDER NOTE</b><div>—</div></div>`;
   openModal(`<h3>${t.status==='cancelled'?'Voided Order':'Order Receipt'}</h3><div class="msub">${t.ref}</div>
-    <div class="receipt" id="rcArea">
-      <div class="rc"><b>POINT OF SALES &amp; INVENTORY MANAGEMENT SYSTEM</b><div>54 Barangay Mamatid Road, City of Cabuyao, Laguna</div><div>Tel: 0916 989 583</div></div>
-      <div style="font-size:10.5px;margin-bottom:6px"><div>Ref: <b>${t.ref}</b> &nbsp; ${fmtDT(t.date)}</div><div>Cashier: ${esc(cashierName(t,db))}</div><div>Order: ${esc(t.orderType||'Dine-in')}</div>${t.customer?`<div>Customer: ${esc(t.customer)}</div>`:''}${t.note?`<div>Note: ${esc(t.note)}</div>`:''}${t.status==='cancelled'?'<div style="color:#DC2626;font-weight:bold">VOIDED</div>':''}</div>
-      <table><tr><th style="text-align:left">Item</th><th>Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Amount</th></tr>${rows}</table>
-      <div class="tot"><div class="trow"><span>Subtotal</span><span>PHP ${money0(t.subtotal)}</span></div>${t.discount?`<div class="trow"><span>Discount</span><span>- PHP ${money0(t.discount)}</span></div>`:''}<div class="trow" style="font-weight:bold;font-size:12px"><span>TOTAL</span><span>PHP ${money0(t.total)}</span></div>${t.status==='completed'?`<div class="trow"><span>Cash</span><span>PHP ${money0(t.payment)}</span></div><div class="trow"><span>Change</span><span>PHP ${money0(t.change)}</span></div>`:''}</div>
-      <div class="rc" style="border:none;padding-top:6px;margin-bottom:0"><div style="font-size:9px">Thank you for dining with us!</div></div>
+    <div class="receipt-wrap">
+      <div><div class="receipt-caption">CUSTOMER RECEIPT</div>
+        <div class="receipt" id="rcArea">
+          <div class="rc"><b>POINT OF SALES &amp; INVENTORY MANAGEMENT SYSTEM</b><div>54 Barangay Mamatid Road, City of Cabuyao, Laguna</div><div>Tel: 0916 989 583</div></div>
+          <div style="font-size:10.5px;margin-bottom:6px"><div>Ref: <b>${t.ref}</b> &nbsp; ${fmtDT(t.date)}</div><div>Cashier: ${esc(cashierName(t,db))}</div><div>Order: ${esc(t.orderType||'Dine-in')}</div>${t.customer?`<div>Customer: ${esc(t.customer)}</div>`:''}${note?`<div>Order Note: ${esc(note)}</div>`:''}${t.status==='cancelled'?'<div style="color:#DC2626;font-weight:bold">VOIDED</div>':''}</div>
+          <table><tr><th style="text-align:left">Item</th><th>Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Amount</th></tr>${rows}</table>
+          <div class="tot"><div class="trow"><span>Subtotal</span><span>PHP ${money0(t.subtotal)}</span></div>${t.discount?`<div class="trow"><span>Discount</span><span>- PHP ${money0(t.discount)}</span></div>`:''}<div class="trow" style="font-weight:bold;font-size:12px"><span>TOTAL</span><span>PHP ${money0(t.total)}</span></div>${t.status==='completed'?`<div class="trow"><span>Cash</span><span>PHP ${money0(t.payment)}</span></div><div class="trow"><span>Change</span><span>PHP ${money0(t.change)}</span></div>`:''}</div>
+          <div class="rc" style="border:none;padding-top:6px;margin-bottom:0"><div style="font-size:9px">Thank you for dining with us!</div></div>
+        </div>
+      </div>
+      <div><div class="receipt-caption">KITCHEN RECEIPT</div>
+        <div class="receipt kitchen" id="kcArea">
+          <div class="rc"><b>KITCHEN ORDER</b><div>${t.ref} &nbsp; ${fmtDT(t.date)}</div></div>
+          <div class="kc-meta"><div>Order: <b>${esc(t.orderType||'Dine-in')}</b></div><div>Cashier: ${esc(cashierName(t,db))}</div>${t.customer?`<div>Customer: ${esc(t.customer)}</div>`:''}</div>
+          ${knote}
+          <table><tr><th style="text-align:left">Item</th><th style="text-align:right">Qty</th></tr>${krows}</table>
+          <div class="rc" style="border:none;padding-top:6px;margin-bottom:0"><div style="font-size:9px">Prepare ${t.items.reduce((s,i)=>s+i.qty,0)} item(s)</div></div>
+        </div>
+      </div>
     </div>
-    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Close</button><button class="btn" onclick="printReceipt()">Print</button></div>`,true);
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Close</button><button class="btn btn-ghost" onclick="printKitchenReceipt()">Print Kitchen</button><button class="btn" onclick="printReceipt()">Print Customer</button></div>`,true);
   $('#printArea').innerHTML=$('#rcArea')?.outerHTML||'';
 }
 function printReceipt(){const a=$('#printArea');a.style.display='block';a.innerHTML=$('#rcArea')?.outerHTML||'';window.print();setTimeout(()=>{a.style.display='none'},200)}
+function printKitchenReceipt(){const a=$('#printArea');a.style.display='block';a.innerHTML=$('#kcArea')?.outerHTML||'';window.print();setTimeout(()=>{a.style.display='none'},200)}
 

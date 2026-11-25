@@ -14,3 +14,7 @@ app/seed-url.txt
 app/api-url.txt
 old-backups/
 
+# Reports and presentations (not part of the app)
+*.docx
+*.pptx
+
