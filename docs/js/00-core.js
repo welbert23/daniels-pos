@@ -108,9 +108,15 @@ const IS_LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/i.
 const IS_TUNNEL = /\.trycloudflare\.com$/i.test(location.hostname);
 const API_QUERY = new URLSearchParams(location.search).get('api');
 const API_LIST_KEY = 'sipos_api_urls_v1';
+function normalizeApiUrl(value){
+  const s=String(value||'').trim();
+  if(!/^https?:\/\//i.test(s)||/[?]/.test(s)) return s;
+  const base=s.replace(/\/+$/,'');
+  return /\.php$/i.test(base)?base:(base+'/pos-server/api.php');
+}
 function parseApiList(value){
   if(!value) return [];
-  return String(value).split(',').map(s=>s.trim()).filter(s=>/^https?:\/\//i.test(s));
+  return String(value).split(',').map(normalizeApiUrl).filter(s=>/^https?:\/\//i.test(s));
 }
 let API_CHOICES=[];
 try{const saved=JSON.parse(localStorage.getItem(API_LIST_KEY)||'[]');if(Array.isArray(saved))API_CHOICES=saved.filter(s=>typeof s==='string')}catch(e){}
