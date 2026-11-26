@@ -107,25 +107,60 @@ const IS_GH_PAGES = /\.github\.io$/i.test(location.hostname);
 const IS_LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/i.test(location.hostname);
 const IS_TUNNEL = /\.trycloudflare\.com$/i.test(location.hostname);
 const API_QUERY = new URLSearchParams(location.search).get('api');
-if (API_QUERY) localStorage.setItem('sipos_api_url', API_QUERY);
+const API_LIST_KEY = 'sipos_api_urls_v1';
+function parseApiList(value){
+  if(!value) return [];
+  return String(value).split(',').map(s=>s.trim()).filter(s=>/^https?:\/\//i.test(s));
+}
+let API_CHOICES=[];
+try{const saved=JSON.parse(localStorage.getItem(API_LIST_KEY)||'[]');if(Array.isArray(saved))API_CHOICES=saved.filter(s=>typeof s==='string')}catch(e){}
+const QUERIED_APIS=parseApiList(API_QUERY);
+if(QUERIED_APIS.length){
+  API_CHOICES=QUERIED_APIS.concat(API_CHOICES.filter(u=>!QUERIED_APIS.includes(u))).slice(0,5);
+  try{localStorage.setItem(API_LIST_KEY,JSON.stringify(API_CHOICES));localStorage.setItem('sipos_api_url',API_CHOICES[0])}catch(e){}
+}
 if (IS_GH_PAGES) history.replaceState(null, '', location.pathname);
-const API = IS_GH_PAGES
-  ? (API_QUERY || window.POS_API_URL || localStorage.getItem('sipos_api_url') || 'api.php')
-  : IS_LOCAL
-    ? 'http://localhost/pos-server/api.php'
-    : IS_TUNNEL
-      ? '/pos-server/api.php'
-      : 'api.php';
+const CONFIGURED_APIS=parseApiList(window.POS_API_URL);
+const FALLBACK_API=(()=>{try{return localStorage.getItem('sipos_api_url')||''}catch(e){return''}})();
+let APIS;
+if(IS_GH_PAGES){
+  APIS = QUERIED_APIS.length ? QUERIED_APIS
+    : (CONFIGURED_APIS.length ? CONFIGURED_APIS
+    : (API_CHOICES.length ? API_CHOICES
+    : (FALLBACK_API ? [FALLBACK_API] : ['api.php'])));
+}else if(IS_LOCAL){
+  APIS=['http://localhost/pos-server/api.php'];
+}else if(IS_TUNNEL){
+  APIS=['/pos-server/api.php'];
+}else{
+  APIS=[CONFIGURED_APIS[0]||'api.php'];
+}
+const API=APIS[0];
+function rememberApi(i){
+  if(i<=0||i>=APIS.length)return;
+  const chosen=APIS[i];
+  APIS=[chosen].concat(APIS.filter((_,n)=>n!==i));
+  try{localStorage.setItem(API_LIST_KEY,JSON.stringify(APIS.slice(0,5)));localStorage.setItem('sipos_api_url',chosen)}catch(e){}
+}
 const TOKEN_KEY = 'sipos_token_v1';
 function authToken(){return localStorage.getItem(TOKEN_KEY)||''}
 function authHeaders(extra={}){return Object.assign({'Content-Type':'application/json','X-POS-Token':authToken()},extra||{})}
+const RETRYABLE_STATUS=new Set([502,503,504,524]);
 async function apiFetch(action,opts={}){
-  const r=await fetch(API+'?action='+action,Object.assign({cache:'no-store'},opts,{headers:authHeaders(opts.headers||{})}));
-  if(r.status===401){
-    localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(SESSION_KEY);
-    const e=new Error('Session expired');e.name='SessionExpired';throw e;
+  let lastErr=null;
+  for(let i=0;i<APIS.length;i++){
+    try{
+      const r=await fetch(APIS[i]+'?action='+action,Object.assign({cache:'no-store'},opts,{headers:authHeaders(opts.headers||{})}));
+      if(RETRYABLE_STATUS.has(r.status)&&i<APIS.length-1){lastErr=new Error('Tunnel '+r.status+' at '+APIS[i]);continue}
+      rememberApi(i);
+      if(r.status===401){
+        localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(SESSION_KEY);
+        const e=new Error('Session expired');e.name='SessionExpired';throw e;
+      }
+      return r;
+    }catch(e){if(e.name==='SessionExpired')throw e;lastErr=e}
   }
-  return r;
+  throw lastErr||new Error('No API endpoint available');
 }
 const OFFLINE_KEY='sipos_offline_queue_v1';
 let DB=null, OFFLINE=false, _syncTimer=null, _syncing=false, _dirty=false;
