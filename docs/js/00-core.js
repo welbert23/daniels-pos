@@ -121,13 +121,13 @@ if(QUERIED_APIS.length){
 }
 if (IS_GH_PAGES) history.replaceState(null, '', location.pathname);
 const CONFIGURED_APIS=parseApiList(window.POS_API_URL);
-const FALLBACK_API=(()=>{try{return localStorage.getItem('sipos_api_url')||''}catch(e){return''}})();
+const FALLBACK_APIS=parseApiList((()=>{try{return localStorage.getItem('sipos_api_url')||''}catch(e){return''}})());
 let APIS;
 if(IS_GH_PAGES){
   APIS = QUERIED_APIS.length ? QUERIED_APIS
     : (CONFIGURED_APIS.length ? CONFIGURED_APIS
     : (API_CHOICES.length ? API_CHOICES
-    : (FALLBACK_API ? [FALLBACK_API] : ['api.php'])));
+    : (FALLBACK_APIS.length ? FALLBACK_APIS : ['api.php'])));
 }else if(IS_LOCAL){
   APIS=['http://localhost/pos-server/api.php'];
 }else if(IS_TUNNEL){
