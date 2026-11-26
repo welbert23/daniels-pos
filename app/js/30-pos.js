@@ -83,9 +83,11 @@ function deductIngredient(db,name,amount){
     left=Number((left-take).toFixed(3));
   }
 }
-function checkout(){
+async function checkout(){
   if(!CAN.usePOS(me().role))return toast('No POS access');
-  if(!cart.length)return;const db=load(),t=cartTotals(),paid=parseFloat($('#cashInput')?.value)||0;
+  if(!cart.length)return;
+  const btn=$('.checkout-btn');if(btn&&btn.disabled)return;
+  const db=load(),t=cartTotals(),paid=parseFloat($('#cashInput')?.value)||0;
   const custSel=$('#custSel')?.value;let customer=null;
   if(custSel)customer=db.customers.find(c=>c.id===custSel);
   if(paid<t.total)return toast('Insufficient cash amount');
@@ -97,9 +99,31 @@ function checkout(){
       if(avail<need)return toast('Not enough '+r.name+' ('+qty(avail)+' '+(batches[0]?.unit||'')+' left)');
     }
   }
-  const trx={id:uid(),ref:refNo(),date:new Date().toISOString(),items:cart.map(c=>({name:c.name,qty:c.qty,price:c.price,line:0})),subtotal:t.sub,discount:t.disc,total:t.total,payment:paid,change:paid-t.total,cashier:me().name,cashierId:me().id,customer:customer?.name,customerId:customer?.id,orderType,note:cartNote.trim(),status:'completed'};
-  cart.forEach(c=>{const it=db.items.find(i=>i.id===c.id);if(it)it.stock=Math.max(0,it.stock-c.qty);for(const r of (it&&it.recipe)||[])deductIngredient(db,r.name,r.qty*c.qty)});
-  db.transactions.push(trx);save(db);logAction('add','transaction',trx.id,trx.ref+' · PHP '+money0(trx.total),null,{ref:trx.ref,total:trx.total,items:trx.items});cart=[];cartSeq=0;cartDiscount=0;cartCustomer='';cartNote='';renderCart();renderNav();showReceiptModal(trx);toast('Order completed — '+trx.ref);
+  const payload={id:uid(),items:cart.map(c=>({id:c.id,qty:c.qty})),discountRate:cartDiscount,discount:t.disc,payment:paid,customerId:customer?.id||'',orderType,note:cartNote.trim()};
+  if(btn)btn.disabled=true;
+  dbStatus('saving','Saving sale…');
+  try{
+    const r=await apiFetch('cashier_sale',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const j=await r.json();
+    if(!j.ok)throw new Error(j.error||'Sale failed');
+    const trx=j.transaction;
+    if(j.meta&&typeof j.meta.seq==='number')db.meta.seq=j.meta.seq;
+    const itemStock=(j.stock&&j.stock.items)||[];
+    const ingStock=(j.stock&&j.stock.ingredients)||[];
+    itemStock.forEach(s=>{const it=db.items.find(i=>i.id===s.id);if(it)it.stock=Number(s.stock)});
+    ingStock.forEach(s=>{const g=db.ingredients.find(i=>i.id===s.id);if(g)g.stock=Number(s.stock)});
+    if(!db.transactions.some(x=>x.id===trx.id))db.transactions.push(trx);
+    DB=db;
+    localStorage.removeItem(OFFLINE_KEY);
+    if(me().role==='cashier'){clearTimeout(_syncTimer);_dirty=false}
+    dbStatus('ok','MySQL connected');
+    cart=[];cartSeq=0;cartDiscount=0;cartCustomer='';cartNote='';
+    renderPOS();renderNav();showReceiptModal(trx);toast('Order completed — '+trx.ref);
+  }catch(e){
+    console.error('[POS] sale failed:',e);
+    dbStatus('err','Sale not saved — try again');
+    toast('Sale not saved: '+(e.message||'database error'));
+  }finally{if(btn)btn.disabled=false}
 }
 
 /* --- receipt --- */
