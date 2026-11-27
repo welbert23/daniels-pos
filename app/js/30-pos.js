@@ -5,7 +5,7 @@
 /* ============================================================
    POS
    ============================================================ */
-let cart=[],cartSeq=0,cartDiscount=0,cartCustomer='',cartNote='',orderType='Dine-in',catFilter='All',posQ='';
+let cart=[],cartSeq=0,cartDiscount=0,cartCustomer='',cartNote='',orderType='Dine-in',catFilter='All',posQ='',custSearchQuery='',custPopupOpen=false;
 function cartTotals(){const sub=cart.reduce((s,c)=>s+c.price*c.qty,0);let disc=Math.round(sub*cartDiscount*100)/100;if(disc>sub)disc=sub;return{sub,disc,total:Math.round((sub-disc)*100)/100}}
 function renderPOS(){
   const db=load(),items=db.items.filter(i=>i.stock>0);
@@ -42,16 +42,25 @@ function renderPOS(){
 function addCart(id){if(!CAN.usePOS(me().role))return toast('No POS access');const db=load(),it=db.items.find(i=>i.id===id);if(!it||it.stock<=0)return toast('Out of stock');const has=cart.find(c=>c.id===id);if(has){if(has.qty+1>it.stock)return toast('Only '+it.stock+' available');has.qty++;has.seq=++cartSeq}else cart.push({id,name:it.name,price:it.price,qty:1,seq:++cartSeq});renderCart()}
 function setQty(id,d){const db=load(),c=cart.find(x=>x.id===id),it=db.items.find(i=>i.id===id);if(!c)return;c.qty+=d;if(c.qty<=0)cart=cart.filter(x=>x.id!==id);else if(it&&c.qty>it.stock){c.qty=it.stock;toast('Max stock: '+it.stock)}renderCart()}
 function rmCart(id){cart=cart.filter(x=>x.id!==id);renderCart()}
-function clearCart(){cart=[];cartSeq=0;cartDiscount=0;cartCustomer='';cartNote='';renderCart()}
+function clearCart(){cart=[];cartSeq=0;cartDiscount=0;cartCustomer='';cartNote='';custSearchQuery='';custPopupOpen=false;renderCart()}
 function renderCart(){
   const body=$('#cartBody'),foot=$('#cartFoot');if(!body)return;
   const db=load();
   if(!cart.length){body.innerHTML=`<div class="cart-empty"><b>Cart is empty</b>Tap a menu item to start</div>`}else{
     body.innerHTML=[...cart].sort((a,b)=>(b.seq||0)-(a.seq||0)).map(c=>`<div class="cline"><div class="info"><b>${esc(c.name)}</b><span>PHP ${money0(c.price)} each</span></div><div class="amt">PHP ${money0(c.price*c.qty)}</div><div class="qty"><button onclick="setQty('${c.id}',-1)">&minus;</button><b>${c.qty}</b><button onclick="setQty('${c.id}',1)">+</button></div><button class="rm" onclick="rmCart('${c.id}')"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`).join('')}
   const t=cartTotals(),discPct=t.sub?t.disc/t.sub*100:0;
+  const dbNow=load();
+  if(cartCustomer&&!(dbNow.customers||[]).some(c=>c.id===cartCustomer)){cartCustomer='';custSearchQuery=''}
+  if(cartCustomer&&!custSearchQuery){const c=(dbNow.customers||[]).find(x=>x.id===cartCustomer);if(c)custSearchQuery=String(c.name||'')+(c.phone?' \u00b7 '+String(c.phone):'')}
   foot.innerHTML=`
     <div class="ot-row">${['Dine-in','Take-out','Delivery'].map(ot=>`<div class="ot-btn ${orderType===ot?'active':''}" onclick="orderType='${ot}';renderCart()">${ot}</div>`).join('')}</div>
-    <div class="cust-row"><span class="clbl">Customer</span><select id="custSel" onchange="cartCustomer=this.value"><option value="">Walk-in</option>${db.customers.map(c=>`<option value="${c.id}" ${cartCustomer===c.id?'selected':''}>${esc(c.name)}${c.phone?' \u00b7 '+esc(c.phone):''}</option>`).join('')}</select></div>
+    <div class="cust-row">
+  <label class="clbl" for="custSearch">Customer</label>
+  <div class="cust-picker">
+    <input id="custSearch" class="cust-search" type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="custPopup" aria-expanded="false" placeholder="Walk-in / search customers" value="${esc(custSearchQuery)}" oninput="custSearchInput(this.value)" onfocus="custPopupOpen=true;renderCustPopup()" onkeydown="custSearchKey(event)">
+    <div id="custPopup" class="cust-popup" role="listbox"></div>
+  </div>
+</div>
     <div class="note-row"><textarea id="cartNote" maxlength="500" placeholder="Order note (optional)" oninput="cartNote=this.value"></textarea></div>
     <div class="sum-row"><span>Subtotal</span><span class="ph">PHP ${money0(t.sub)}</span></div>
     <div class="disc-row"><select id="discSel" onchange="cartDiscount=parseFloat(this.value||0);renderCart()"><option value="0">No discount</option><option value="0.05">5% off</option><option value="0.1">10% off</option><option value="0.15">15% off</option><option value="0.2">20% off</option><option value="0.25">25% off</option></select>${cartDiscount?`<button class="clear" onclick="cartDiscount=0;renderCart()">remove</button>`:''}</div>
@@ -64,6 +73,80 @@ function renderCart(){
     <button class="checkout-btn" ${cart.length?'':'disabled'} onclick="checkout()">CHECKOUT — PHP ${money0(t.total)}</button>`;
   if(cartDiscount){const sel=$('#discSel');if(sel){sel.value=String(cartDiscount);}}
   const nt=$('#cartNote');if(nt)nt.value=cartNote;
+  renderCustPopup();
+}
+function renderCustPopup(){
+  const pop=$('#custPopup'),inp=$('#custSearch');if(!pop)return;
+  const db=load(),query=String(custSearchQuery||'').trim().toLowerCase();
+  const matches=(db.customers||[]).filter(c=>!query||[c.name,c.phone,c.email].some(v=>String(v||'').toLowerCase().includes(query)));
+  const rows=matches.map(c=>{
+    const sub=[c.phone,c.email].filter(Boolean).map(String).join(' \u00b7 ');
+    return `<div class="cust-popup-item" role="option" aria-selected="false" data-customer-id="${esc(c.id)}"><span class="cust-popup-name">${esc(c.name)}</span>${sub?`<span class="cust-popup-sub">${esc(sub)}</span>`:''}</div>`;
+  });
+  const walkin=`<div class="cust-popup-item walkin" role="option" aria-selected="false" data-customer-id=""><span class="cust-popup-name">Walk-in / No customer</span><span class="cust-popup-sub">clears selection</span></div>`;
+  const empty=matches.length?'':`<div class="cust-popup-empty">No customers found</div>`;
+  pop.innerHTML=`<div class="cust-popup-list">${rows.join('')+empty}</div>`+walkin;
+  pop.classList.toggle('open',custPopupOpen);
+  if(custPopupOpen){pop.classList.remove('up');if(pop.getBoundingClientRect().bottom>window.innerHeight-8)pop.classList.add('up')}
+  if(inp)inp.setAttribute('aria-expanded',custPopupOpen?'true':'false');
+}
+function custSearchInput(v){
+  custSearchQuery=v;
+  const c=cartCustomer?(load().customers||[]).find(x=>x.id===cartCustomer):null;
+  const label=c?String(c.name||'')+(c.phone?' \u00b7 '+String(c.phone):''):'';
+  if(v!==label)cartCustomer='';
+  custPopupOpen=true;
+  renderCustPopup();
+}
+function custSearchKey(e){
+  if(e.key==='Escape'){
+    e.preventDefault();custPopupOpen=false;
+    const c=cartCustomer?(load().customers||[]).find(x=>x.id===cartCustomer):null;
+    custSearchQuery=c?String(c.name||'')+(c.phone?' \u00b7 '+String(c.phone):''):'';
+    const inp=$('#custSearch');if(inp)inp.value=custSearchQuery;
+    renderCustPopup();return;
+  }
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();custPopupOpen=true;renderCustPopup();
+    const items=[...($('#custPopup')?.querySelectorAll('.cust-popup-item')||[])];
+    if(!items.length)return;
+    const cur=items.findIndex(x=>x.classList.contains('active'));
+    const next=e.key==='ArrowDown'?(cur+1)%items.length:(cur<=0?items.length-1:cur-1);
+    items.forEach((x,i)=>{x.classList.toggle('active',i===next);x.setAttribute('aria-selected',i===next?'true':'false')});
+    items[next].scrollIntoView({block:'nearest'});return;
+  }
+  if(e.key==='Enter'){
+    e.preventDefault();
+    const pop=$('#custPopup');
+    const target=pop?.querySelector('.cust-popup-item.active')||pop?.querySelector('.cust-popup-list .cust-popup-item')||pop?.querySelector('.cust-popup-item.walkin');
+    if(target)target.click();
+  }
+}
+function selectCust(id){
+  const db=load();
+  if(id===''||id===undefined||id===null){
+    cartCustomer='';
+    custSearchQuery='';
+    custPopupOpen=false;
+    const inp=$('#custSearch');if(inp)inp.value='';
+    renderCustPopup();
+    return;
+  }
+  const c=(db.customers||[]).find(x=>x.id===id);
+  if(c){
+    cartCustomer=id;
+    custSearchQuery=String(c.name||'')+(c.phone?' \u00b7 '+String(c.phone):'');
+    custPopupOpen=false;
+    const inp=$('#custSearch');if(inp)inp.value=custSearchQuery;
+    renderCustPopup();
+  }else{
+    cartCustomer='';
+    custSearchQuery='';
+    custPopupOpen=false;
+    const inp=$('#custSearch');if(inp)inp.value='';
+    renderCustPopup();
+    toast('Customer not found — treated as Walk-in');
+  }
 }
 function quickCash(amt){const i=$('#cashInput');if(i){i.value=amt.toFixed(2);updateChange();i.focus()}}
 function updateChange(){const t=cartTotals(),paid=parseFloat($('#cashInput')?.value)||0,el=$('#changeTxt');if(el)el.textContent=paid>=t.total?`PHP ${money0(paid-t.total)}`:'—'}
@@ -88,8 +171,10 @@ async function checkout(){
   if(!cart.length)return;
   const btn=$('.checkout-btn');if(btn&&btn.disabled)return;
   const db=load(),t=cartTotals(),paid=parseFloat($('#cashInput')?.value)||0;
-  const custSel=$('#custSel')?.value;let customer=null;
-  if(custSel)customer=db.customers.find(c=>c.id===custSel);
+  let customer=null;
+  if(cartCustomer){
+    customer=(db.customers||[]).find(c=>c.id===cartCustomer)||null;
+  }
   if(paid<t.total)return toast('Insufficient cash amount');
   for(const c of cart){
     const it=db.items.find(i=>i.id===c.id);
@@ -117,7 +202,7 @@ async function checkout(){
     localStorage.removeItem(OFFLINE_KEY);
     if(me().role==='cashier'){clearTimeout(_syncTimer);_dirty=false}
     dbStatus('ok','MySQL connected');
-    cart=[];cartSeq=0;cartDiscount=0;cartCustomer='';cartNote='';
+    cart=[];cartSeq=0;cartDiscount=0;cartCustomer='';cartNote='';custSearchQuery='';custPopupOpen=false;
     renderPOS();renderNav();showReceiptModal(trx);toast('Order completed — '+trx.ref);
   }catch(e){
     console.error('[POS] sale failed:',e);
@@ -158,4 +243,9 @@ function showReceiptModal(t){
 }
 function printReceipt(){const a=$('#printArea');a.style.display='block';a.innerHTML=$('#rcArea')?.outerHTML||'';window.print();setTimeout(()=>{a.style.display='none'},200)}
 function printKitchenReceipt(){const a=$('#printArea');a.style.display='block';a.innerHTML=$('#kcArea')?.outerHTML||'';window.print();setTimeout(()=>{a.style.display='none'},200)}
+document.addEventListener('click',e=>{
+  const item=e.target.closest?.('.cust-popup-item');
+  if(item&&$('#custPopup')?.contains(item)){selectCust(item.dataset.customerId||'');return}
+  if(custPopupOpen&&!e.target.closest?.('.cust-picker')){custPopupOpen=false;renderCustPopup()}
+});
 
