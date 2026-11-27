@@ -10,7 +10,7 @@ const ATT_STATUS={in:'ON DUTY',lunch:'LUNCH BREAK',back:'BACK FROM LUNCH',coffee
 const ATT_SHORT={in:'IN',lunch:'LUNCH',back:'BACK',coffee:'COFFEE',back2:'BACK',done:'DONE'};
 const DAY_LIST=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const SCHEDULABLE=r=>r==='cashier'||r==='inventory';
-let attDate=todayStr(),_schedCache={};
+let attDate=todayStr(),_schedCache={},attUserFilter='';
 function localStamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`}
 function fmtClock(s){const m=String(s||'').match(/(\d{2}):(\d{2})/);if(!m)return '—';let h=+m[1];const ap=h>=12?'PM':'AM';h=h%12||12;return `${h}:${m[2]} ${ap}`}
 function fmtShortClock(s){const m=String(s||'').match(/(\d{2}):(\d{2})/);return m?`${m[1]}:${m[2]}`:'—'}
@@ -26,6 +26,19 @@ function isoWeek(dateStr){
   return 1+Math.round((d-first)/604800000);
 }
 function schedWeek(dateStr){return isoWeek(dateStr)%2===1?1:2}
+function attCycleDates(dateStr){
+  const p=n=>String(n).padStart(2,'0');
+  const base=new Date(dateStr+'T12:00:00');
+  const shift=(base.getDay()+6)%7;
+  const start=new Date(base);start.setDate(base.getDate()-shift-(schedWeek(dateStr)===1?0:7));
+  return Array.from({length:14},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`});
+}
+function shiftAttCycle(dir){
+  const p=n=>String(n).padStart(2,'0');
+  const d=new Date(attDate+'T12:00:00');d.setDate(d.getDate()+dir*14);
+  attDate=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+  renderAttendance();
+}
 function minsOfClock(v){const m=String(v||'').match(/^(\d{1,2}):(\d{2})/);return m?(+m[1]*60+ +m[2]):null}
 function minsOfStamp(v){const m=String(v||'').match(/(\d{2}):(\d{2})/);return m?(+m[1]*60+ +m[2]):null}
 function attFlag(row,sch,day,week){
@@ -52,24 +65,40 @@ function attNext(r){
 async function renderAttendance(){
   $('#content').innerHTML='<div class="card"><div class="card-empty">Loading attendance…</div></div>';
   try{
+    const cycle=attCycleDates(attDate),start=cycle[0],end=cycle[13];
     const [ar,sr]=await Promise.all([
-      apiFetch('attendance&date='+encodeURIComponent(attDate)),
+      apiFetch('attendance&start='+encodeURIComponent(start)+'&end='+encodeURIComponent(end)),
       apiFetch('schedules'),
     ]);
     const j=await ar.json(),sj=await sr.json();
     if(!j.ok)throw new Error(j.error||'Cannot load attendance');
     _schedCache=Object.fromEntries((sj.rows||[]).map(s=>[s.user_id,s]));
     const me=session()||{},day=dayOfWeek(attDate),week=schedWeek(attDate),byUser={};
-    (j.rows||[]).forEach(r=>{byUser[r.user_id]=r});
+    (j.rows||[]).forEach(r=>{byUser[r.user_id+'|'+r.work_date]=r});
     const known=(DB.users||[]).map(u=>({id:u.id,name:u.name,username:u.username,role:u.role}));
     (j.rows||[]).forEach(r=>{if(!known.some(u=>u.id===r.user_id))known.push({id:r.user_id,name:r.name,username:r.username,role:r.role})});
-    const view=known.map(u=>{const r=byUser[u.id]||null,sc=_schedCache[u.id]||null;return{u,r,s:sc,f:attFlag(r,sc,day,week)}});
-    const mine=view.find(v=>v.u.id===me.id)||null,row=mine?.r||null,next=attNext(row),bk=attBreaks(row);
+    const attVisibleRoles={superadmin:['client','cashier','inventory'],client:['cashier','inventory'],cashier:['cashier'],inventory:['inventory']};
+    const allowed=attVisibleRoles[me.role];
+    const roleOrder={client:0,cashier:1,inventory:2};
+    const visible=(allowed?known.filter(u=>allowed.includes(u.role)):known).sort((a,b)=>(roleOrder[a.role]??9)-(roleOrder[b.role]??9)||a.name.localeCompare(b.name));
+    if(attUserFilter&&!visible.some(u=>u.id===attUserFilter))attUserFilter='';
+    const viewAll=visible.map(u=>{const r=byUser[u.id]||null,sc=_schedCache[u.id]||null;return{u,r,s:sc,f:attFlag(r,sc,day,week)}});
+    const view=attUserFilter?viewAll.filter(v=>v.u.id===attUserFilter):viewAll;
+    const mine=viewAll.find(v=>v.u.id===me.id)||null,row=byUser[me.id+'|'+attDate]||null,next=attNext(row),bk=attBreaks(row);
     const total=row?.time_in&&row?.time_out?attMins(row.time_in,row.time_out)-(bk.lunch||0)-(bk.coffee||0):null;
     const cells=[['TIME IN',row?.time_in],['LUNCH OUT',row?.lunch_out],['LUNCH IN',row?.lunch_in],['COFFEE OUT',row?.coffee_out],['COFFEE IN',row?.coffee_in],['TIME OUT',row?.time_out]];
+    const userOpts=`<option value="">All users (${visible.length})</option>`+visible.map(u=>`<option value="${esc(u.id)}"${attUserFilter===u.id?' selected':''}>${esc(u.name)} (${esc(u.role)})</option>`).join('');
+    const matrix=view.flatMap(v=>cycle.map(dt=>{
+      const r=byUser[v.u.id+'|'+dt]||null,f=attFlag(r,v.s,dayOfWeek(dt),schedWeek(dt));
+      const punch=k=>`<td class="num">${esc(fmtShortClock(r?.[k]))}</td>`;
+      return`<tr><td style="white-space:nowrap">${esc(dt)}</td><td>W${schedWeek(dt)}</td><td>${esc(dayOfWeek(dt))}</td><td><b>${esc(v.u.name)}</b><small style="display:block;color:var(--mut2);font-size:9px">@${esc(v.u.username)}</small></td><td>${esc(v.u.role)}</td>${punch('time_in')}${punch('lunch_out')}${punch('lunch_in')}${punch('coffee_out')}${punch('coffee_in')}${punch('time_out')}<td><span class="pill ${f.st}" title="${esc(f.note)}">${esc(f.lb)}</span></td></tr>`;
+    })).join('');
     $('#content').innerHTML=`
-      <div class="toolrow"><div><b style="font-size:13px">${esc(attDate)} · ${esc(day)} · Week ${week}</b></div><div class="spacer"></div>
+      <div class="toolrow"><div><b style="font-size:13px">${esc(attDate)} · ${esc(day)} · Week ${week}</b><br><small style="color:var(--mut2)">Cycle ${esc(start)} to ${esc(end)}</small></div><div class="spacer"></div>
         <input type="date" value="${esc(attDate)}" onchange="attDate=this.value;renderAttendance()" style="padding:8px;border:2px solid var(--border);border-radius:10px;font-weight:700;background:var(--surface)">
+        <button class="btn btn-ghost btn-sm" onclick="shiftAttCycle(-1)" title="Previous 2 weeks">« Prev 2 Weeks</button>
+        <button class="btn btn-ghost btn-sm" onclick="shiftAttCycle(1)" title="Next 2 weeks">Next 2 Weeks »</button>
+        <label style="font-size:10px;font-weight:700;color:var(--mut2)">User: <select onchange="attUserFilter=this.value;renderAttendance()" style="padding:8px;border:2px solid var(--border);border-radius:10px;font-weight:700;background:var(--surface)">${userOpts}</select></label>
         ${CAN.manageSchedules(me.role)?'<button class="btn btn-ghost btn-sm" onclick="scheduleList()">⚙ Schedules</button>':''}
         <button class="btn btn-ghost btn-sm" onclick="renderAttendance()">↻ Refresh</button></div>
       <div class="card" style="margin-bottom:12px;padding:10px 14px;font-size:10px;line-height:1.6;color:var(--mut2)">
@@ -85,9 +114,10 @@ async function renderAttendance(){
         </div>
         <div style="margin-top:10px;font-size:10px;color:var(--mut2);font-family:var(--font-m)">LUNCH ${fmtDur(bk.lunch)} &middot; COFFEE ${fmtDur(bk.coffee)} &middot; NET ${fmtDur(total)}</div>
       </div>
-      <div class="card"><h3>All Users <span class="grow"></span><small>${view.length} users</small></h3>
-        <div class="tbl-wrap tbl-wide"><table><tr><th>User</th><th>Role</th><th>Sched</th><th title="Expected hours">Hours</th><th title="Time In">In</th><th title="Lunch Out">L-Out</th><th title="Lunch In">L-In</th><th title="Coffee Out">C-Out</th><th title="Coffee In">C-In</th><th title="Time Out">Out</th><th>Lunch</th><th>Coffee</th><th>Net</th><th>State</th><th>Flag</th></tr>
-          ${view.length?view.map(v=>{const r=v.r,b=attBreaks(r),net=r?.time_in&&r?.time_out?attMins(r.time_in,r.time_out)-(b.lunch||0)-(b.coffee||0):null;return`<tr><td><b>${esc(v.u.name)}</b><small style="display:block;color:var(--mut2);font-size:9px">@${esc(v.u.username)}</small></td><td>${esc(v.u.role)}</td><td style="font-size:9px;white-space:normal">${v.s?esc(String(week===2?(v.s.days2||v.s.days):v.s.days).replace(/,/g,' ')):'<span style="color:var(--mut2)">—</span>'}</td><td class="num" style="white-space:nowrap">${v.s?esc(fmtShortClock(v.s.start_time))+'–'+esc(fmtShortClock(v.s.end_time)):'—'}</td><td class="num">${esc(fmtShortClock(r?.time_in))}</td><td class="num">${esc(fmtShortClock(r?.lunch_out))}</td><td class="num">${esc(fmtShortClock(r?.lunch_in))}</td><td class="num">${esc(fmtShortClock(r?.coffee_out))}</td><td class="num">${esc(fmtShortClock(r?.coffee_in))}</td><td class="num">${esc(fmtShortClock(r?.time_out))}</td><td class="num">${fmtDur(b.lunch)}</td><td class="num">${fmtDur(b.coffee)}</td><td class="num"><b>${fmtDur(net)}</b></td><td><span class="pill ${r?.status==='done'?'ok':'info'}" title="${esc(ATT_STATUS[r?.status]||'NOT YET TIME IN')}">${esc(ATT_SHORT[r?.status]||'—')}</span></td><td><span class="pill ${v.f.st}" title="${esc(v.f.note)}">${esc(v.f.lb)}</span></td></tr>`}).join(''):'<tr><td colspan="15" class="card-empty">No users found</td></tr>'}
+      <div class="card"><h3>2-Week Attendance <span class="grow"></span><small>${view.length * cycle.length} rows &middot; ${esc(start)} to ${esc(end)}</small></h3>
+        <div class="tbl-wrap tbl-wide"><table>
+          <tr><th>Date</th><th>Week</th><th>Day</th><th>User</th><th>Role</th><th>Time In</th><th>L-Out</th><th>L-In</th><th>C-Out</th><th>C-In</th><th>Time Out</th><th>Status</th></tr>
+          ${view.length?matrix:'<tr><td colspan="12" class="card-empty">No users found</td></tr>'}
         </table></div></div>`;
   }catch(e){$('#content').innerHTML=`<div class="card"><div class="card-empty">Cannot load attendance — ${esc(e.message)}</div></div>`}
 }

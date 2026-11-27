@@ -5,12 +5,13 @@
 /* ============================================================
    POS
    ============================================================ */
-let cart=[],cartSeq=0,cartDiscount=0,cartCustomer='',cartNote='',orderType='Dine-in',catFilter='All',posQ='',custSearchQuery='',custPopupOpen=false;
+let cart=[],cartSeq=0,cartDiscount=0,cartCustomer='',cartNote='',orderType='Dine-in',catFilter='',posQ='',custSearchQuery='',custPopupOpen=false;
 function cartTotals(){const sub=cart.reduce((s,c)=>s+c.price*c.qty,0);let disc=Math.round(sub*cartDiscount*100)/100;if(disc>sub)disc=sub;return{sub,disc,total:Math.round((sub-disc)*100)/100}}
 function renderPOS(){
   const db=load(),items=db.items.filter(i=>i.stock>0);
+  const cats=itemCats().filter(c=>c!=='All');
+  if(!catFilter||!cats.includes(catFilter))catFilter=cats[0]||'';
   const catCounts={};items.forEach(i=>{catCounts[i.category]=(catCounts[i.category]||0)+1});
-  catCounts['All']=items.length;
   const f=items.filter(i=>(catFilter==='All'||i.category===catFilter)&&(!posQ||i.name.toLowerCase().includes(posQ)));
   $('#content').innerHTML=`
     <div class="pos-wrap">
@@ -18,7 +19,7 @@ function renderPOS(){
         <div class="pos-search">
           <div class="search-wrap"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="posSearch" placeholder="Search menu..." value="${esc(posQ)}" oninput="posQ=this.value.toLowerCase();renderPOS()"></div>
         </div>
-        <div class="cat-row">${itemCats().map(c=>{const col=c==='All'?'var(--brand)':catColor(c),on=catFilter===c;return`<div class="cat-pill ${on?'active':''}" style="${on?`background:${col};color:#FFFDF5;`:''}" onclick="catFilter='${esc(c).replace(/'/g,"\\'")}';renderPOS()"><span class="cdot" style="background:${col}"></span>${esc(c)} <span class="cnt">${catCounts[c]||0}</span></div>`}).join('')}</div>
+        <div class="cat-row">${cats.map(c=>{const col=catColor(c),on=catFilter===c;return`<div class="cat-pill ${on?'active':''}" style="${on?`background:${col};color:#FFFDF5;`:''}" onclick="catFilter='${esc(c).replace(/'/g,"\\'")}';renderPOS()"><span class="cdot" style="background:${col}"></span>${esc(c)} <span class="cnt">${catCounts[c]||0}</span></div>`}).join('')}</div>
         <div class="plist">${f.length?f.map(i=>{
           const col=catColor(i.category);
           return`<div class="pcard ${i.stock===0?'out':''}" onclick="${i.stock>0?`addCart('${i.id}')`:''}">
@@ -43,6 +44,7 @@ function addCart(id){if(!CAN.usePOS(me().role))return toast('No POS access');con
 function setQty(id,d){const db=load(),c=cart.find(x=>x.id===id),it=db.items.find(i=>i.id===id);if(!c)return;c.qty+=d;if(c.qty<=0)cart=cart.filter(x=>x.id!==id);else if(it&&c.qty>it.stock){c.qty=it.stock;toast('Max stock: '+it.stock)}renderCart()}
 function rmCart(id){cart=cart.filter(x=>x.id!==id);renderCart()}
 function clearCart(){cart=[];cartSeq=0;cartDiscount=0;cartCustomer='';cartNote='';custSearchQuery='';custPopupOpen=false;renderCart()}
+function limitNoteWords(el){const w=String(el.value||'').trim().split(/\s+/).filter(Boolean);if(w.length>50)el.value=w.slice(0,50).join(' ');cartNote=el.value}
 function renderCart(){
   const body=$('#cartBody'),foot=$('#cartFoot');if(!body)return;
   const db=load();
@@ -61,7 +63,7 @@ function renderCart(){
     <div id="custPopup" class="cust-popup" role="listbox"></div>
   </div>
 </div>
-    <div class="note-row"><textarea id="cartNote" maxlength="500" placeholder="Order note (optional)" oninput="cartNote=this.value"></textarea></div>
+    <div class="note-row"><textarea id="cartNote" rows="1" wrap="off" maxlength="500" placeholder="Order note (optional)" oninput="limitNoteWords(this)"></textarea></div>
     <div class="sum-row"><span>Subtotal</span><span class="ph">PHP ${money0(t.sub)}</span></div>
     <div class="disc-row"><select id="discSel" onchange="cartDiscount=parseFloat(this.value||0);renderCart()"><option value="0">No discount</option><option value="0.05">5% off</option><option value="0.1">10% off</option><option value="0.15">15% off</option><option value="0.2">20% off</option><option value="0.25">25% off</option></select>${cartDiscount?`<button class="clear" onclick="cartDiscount=0;renderCart()">remove</button>`:''}</div>
     <div class="sum-row"><span>Discount</span><span style="color:var(--ok)">- PHP ${money0(t.disc)}</span></div>

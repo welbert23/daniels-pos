@@ -26,10 +26,9 @@ function renderDashboard(){
   ];
   const recent=[...done].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
   const greeting=new Date().getHours()<12?'Good morning':new Date().getHours()<17?'Good afternoon':'Good evening';
-  const now=new Date();
 
   $('#content').innerHTML=`
-    <div class="welcome"><h2>${greeting}, ${esc(meU.name?.split(' ')[0]||'there')}</h2><small>${now.toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</small></div>
+    <div class="welcome"><h2>${greeting}, ${esc(meU.name?.split(' ')[0]||'there')}</h2></div>
     <div class="kpi-row">
       <div class="kpi"><div class="icon" style="background:var(--grad)"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><b>PHP ${money0(todaySales)}</b><br><small>Today's Sales</small></div></div>
       <div class="kpi"><div class="icon" style="background:linear-gradient(135deg,#0EA5E9,#0284C7)"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z M4 9h16 M9 4v5 M15 4v5"/></svg></div><div><b>${todayTxs.length}</b><br><small>Transactions Today</small></div></div>
