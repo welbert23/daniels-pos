@@ -44,7 +44,7 @@ async function boot(){
     dbStatus('err','DB offline - queued');
     if(!old){const err=$('#loginErr');if(err){err.style.display='block';err.textContent='Database offline with no local data - import POS-Server\\database.sql, or open this page with a ?api=<tunnel URL> parameter.'}}
   }  const s=session();
-  if(s){const db=load();if(db.users.find(u=>u.id===s.id)){syncDbTools();$('#login').style.display='none';$('#app').style.display='block';$('#userName').textContent=s.name;$('#userRole').textContent=ROLE_LABEL[s.role];$('#userAvatar').textContent=(s.name||'?').trim().charAt(0).toUpperCase();go('dashboard');return}localStorage.removeItem(SESSION_KEY)}
+  if(s){const db=load();if(db.users.find(u=>u.id===s.id)){syncDbTools();$('#login').style.display='none';$('#app').style.display='block';$('#userName').textContent=s.name;$('#userRole').textContent=ROLE_LABEL[s.role];go('dashboard');return}localStorage.removeItem(SESSION_KEY)}
   syncDbTools();$('#login').style.display='flex';$('#logUser').focus();
 }
 setInterval(()=>{const el=$('#clock');if(el){const d=new Date();el.innerHTML=d.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'})+'<em>'+d.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})+'</em>'}},1000);

@@ -51,7 +51,6 @@ async function doLogin(){
     applySidebar();
     const user=j.user;
     $('#userName').textContent=user.name;$('#userRole').textContent=ROLE_LABEL[user.role];
-    $('#userAvatar').textContent=(user.name||'?').trim().charAt(0).toUpperCase();
     go('dashboard');toast('Welcome back, '+user.name.split(' ')[0]+'!')
   }catch(e){
     localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(SESSION_KEY);
