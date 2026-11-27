@@ -5,7 +5,7 @@
 /* ============================================================
    POS
    ============================================================ */
-let cart=[],cartSeq=0,cartDiscount=0,cartCustomer='',cartNote='',orderType='Dine-in',catFilter='All',posQ='',custSearchQuery='',custPopupOpen=false;
+let cart=[],cartSeq=0,cartDiscount=0,cartCustomer='',cartNote='',cartNoteH='',orderType='Dine-in',catFilter='All',posQ='',custSearchQuery='',custPopupOpen=false;
 function cartTotals(){const sub=cart.reduce((s,c)=>s+c.price*c.qty,0);let disc=Math.round(sub*cartDiscount*100)/100;if(disc>sub)disc=sub;return{sub,disc,total:Math.round((sub-disc)*100)/100}}
 function renderPOS(){
   const db=load(),items=db.items.filter(i=>i.stock>0);
@@ -42,9 +42,10 @@ function renderPOS(){
 function addCart(id){if(!CAN.usePOS(me().role))return toast('No POS access');const db=load(),it=db.items.find(i=>i.id===id);if(!it||it.stock<=0)return toast('Out of stock');const has=cart.find(c=>c.id===id);if(has){if(has.qty+1>it.stock)return toast('Only '+it.stock+' available');has.qty++;has.seq=++cartSeq}else cart.push({id,name:it.name,price:it.price,qty:1,seq:++cartSeq});renderCart()}
 function setQty(id,d){const db=load(),c=cart.find(x=>x.id===id),it=db.items.find(i=>i.id===id);if(!c)return;c.qty+=d;if(c.qty<=0)cart=cart.filter(x=>x.id!==id);else if(it&&c.qty>it.stock){c.qty=it.stock;toast('Max stock: '+it.stock)}renderCart()}
 function rmCart(id){cart=cart.filter(x=>x.id!==id);renderCart()}
-function clearCart(){cart=[];cartSeq=0;cartDiscount=0;cartCustomer='';cartNote='';custSearchQuery='';custPopupOpen=false;renderCart()}
+function clearCart(){cart=[];cartSeq=0;cartDiscount=0;cartCustomer='';cartNote='';cartNoteH='';custSearchQuery='';custPopupOpen=false;renderCart()}
 function renderCart(){
   const body=$('#cartBody'),foot=$('#cartFoot');if(!body)return;
+  const oldNote=$('#cartNote');if(oldNote)cartNoteH=oldNote.style.height||'';
   const db=load();
   if(!cart.length){body.innerHTML=`<div class="cart-empty"><b>Cart is empty</b>Tap a menu item to start</div>`}else{
     body.innerHTML=[...cart].sort((a,b)=>(b.seq||0)-(a.seq||0)).map(c=>`<div class="cline"><div class="info"><b>${esc(c.name)}</b><span>PHP ${money0(c.price)} each</span></div><div class="amt">PHP ${money0(c.price*c.qty)}</div><div class="qty"><button onclick="setQty('${c.id}',-1)">&minus;</button><b>${c.qty}</b><button onclick="setQty('${c.id}',1)">+</button></div><button class="rm" onclick="rmCart('${c.id}')"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`).join('')}
@@ -61,7 +62,7 @@ function renderCart(){
     <div id="custPopup" class="cust-popup" role="listbox"></div>
   </div>
 </div>
-    <div class="note-row"><textarea id="cartNote" maxlength="500" placeholder="Order note (optional)" oninput="cartNote=this.value"></textarea></div>
+    <div class="note-row"><textarea id="cartNote" maxlength="500" placeholder="Order note (optional)" oninput="cartNote=this.value" onpointerup="cartNoteH=this.style.height"></textarea></div>
     <div class="sum-row"><span>Subtotal</span><span class="ph">PHP ${money0(t.sub)}</span></div>
     <div class="disc-row"><select id="discSel" onchange="cartDiscount=parseFloat(this.value||0);renderCart()"><option value="0">No discount</option><option value="0.05">5% off</option><option value="0.1">10% off</option><option value="0.15">15% off</option><option value="0.2">20% off</option><option value="0.25">25% off</option></select>${cartDiscount?`<button class="clear" onclick="cartDiscount=0;renderCart()">remove</button>`:''}</div>
     <div class="sum-row"><span>Discount</span><span style="color:var(--ok)">- PHP ${money0(t.disc)}</span></div>
@@ -72,7 +73,7 @@ function renderCart(){
     <div class="change-row"><span>Change</span><span id="changeTxt">—</span></div>
     <button class="checkout-btn" ${cart.length?'':'disabled'} onclick="checkout()">CHECKOUT — PHP ${money0(t.total)}</button>`;
   if(cartDiscount){const sel=$('#discSel');if(sel){sel.value=String(cartDiscount);}}
-  const nt=$('#cartNote');if(nt)nt.value=cartNote;
+  const nt=$('#cartNote');if(nt){nt.value=cartNote;if(cartNoteH)nt.style.height=cartNoteH;}
   renderCustPopup();
 }
 function renderCustPopup(){
@@ -202,7 +203,7 @@ async function checkout(){
     localStorage.removeItem(OFFLINE_KEY);
     if(me().role==='cashier'){clearTimeout(_syncTimer);_dirty=false}
     dbStatus('ok','MySQL connected');
-    cart=[];cartSeq=0;cartDiscount=0;cartCustomer='';cartNote='';custSearchQuery='';custPopupOpen=false;
+    cart=[];cartSeq=0;cartDiscount=0;cartCustomer='';cartNote='';cartNoteH='';custSearchQuery='';custPopupOpen=false;
     renderPOS();renderNav();showReceiptModal(trx);toast('Order completed — '+trx.ref);
   }catch(e){
     console.error('[POS] sale failed:',e);
