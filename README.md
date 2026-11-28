@@ -157,6 +157,29 @@ These are the buttons shown in the sidebar:
 - `config.local.php`, generated URL files, logs, and backups stay in the private server repo.
 - `file://` access is restricted to a small import-related action set and can be disabled in private config.
 
+## Glossary
+
+Program terms used in this README and in the code:
+
+| Term | Meaning |
+|---|---|
+| `app/` | Source frontend folder. `docs/` is the generated GitHub Pages copy. |
+| `api.php` | The single private PHP endpoint and router for all API actions. |
+| `apiFetch()` | Frontend helper that calls `api.php?action=...` and attaches the token. |
+| `bootstrap` | Action that returns the full MySQL snapshot used to render the app. |
+| `save` | Action that syncs the full snapshot into MySQL in one transaction; also replays the offline queue. |
+| `cashier_sale` | Atomic sale action with FEFO ingredient deduction and audit write. |
+| `FEFO` | First-expiring, first-out: ingredient batches are consumed by nearest expiry first. |
+| `token` / `X-POS-Token` | Signed 12-hour credential sent with each request. |
+| `bcrypt` / `HMAC-SHA256` | Password hashing and token signing used by the private API. |
+| `token_epoch` | Per-user counter bumped on password reset to invalidate older sessions. |
+| `role gate` | Server-side `requireRole()` check; frontend buttons are hidden to match. |
+| `localStorage` | Browser storage for cached DB, token, URL list, and offline queue. |
+| `offline queue` | Snapshot saved locally when the API is unreachable, then replayed on reconnect. |
+| `seed URL` | One-time link carrying a comma-separated API URL list. |
+| `tunnel pool` | Up to five short-lived Cloudflare HTTPS tunnels with automatic fallback. |
+| `build-pages.ps1` | Script that copies `app/` to `docs/` and blanks the API config before publishing. |
+
 ## Troubleshooting
 
 | Symptom | What to do |
