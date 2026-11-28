@@ -159,10 +159,23 @@ These are the buttons shown in the sidebar:
 
 ## Glossary
 
-Program terms used in this README and in the code:
+Beginner and program terms used in this README and in the code:
 
 | Term | Meaning |
 |---|---|
+| `HTML` | Markup language that structures the page: buttons, inputs, tables, and modals. |
+| `CSS` | Stylesheet language that controls layout, colors, spacing, and responsive behavior. |
+| `JavaScript` / `JS` | Browser programming language. All POS behavior lives in the numbered JS files. |
+| `PHP` | Server-side language. `api.php` is the only PHP entry point. |
+| `SQL` | Language for reading and changing database rows with `SELECT`, `INSERT`, `UPDATE`, and `DELETE`. |
+| `MySQL` | Database engine that stores `pos_inventory`. It is the source of truth. |
+| `HTTP` / `HTTPS` | Web request/response protocol; HTTPS adds encryption. |
+| `JSON` | Text format used to exchange data between the browser and `api.php`. |
+| `API` | Defined way for the frontend to call the backend. Here it is `api.php?action=...`. |
+| `GET` / `POST` | HTTP methods: GET reads, POST sends data such as a login or sale payload. |
+| `DOM` | Browser object representation of the HTML that JavaScript updates. |
+| `frontend` / `backend` | Browser side / server side of the system. |
+| `database` / `table` / `row` | Organized data store / collection of records / one record. |
 | `app/` | Source frontend folder. `docs/` is the generated GitHub Pages copy. |
 | `api.php` | The single private PHP endpoint and router for all API actions. |
 | `apiFetch()` | Frontend helper that calls `api.php?action=...` and attaches the token. |
