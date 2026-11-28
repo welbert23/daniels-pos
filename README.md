@@ -45,20 +45,20 @@ Start/repair is handled by the private server launchers (`start-pos.bat`, `start
 
 Role checks are enforced by `api.php`; buttons are also hidden in the frontend to match the role.
 
-## Features
+## Main menu
 
-- **POS** — item search, category pills, cart, discounts, cash/change, order type, customer picker, checkout note, customer and kitchen receipts.
-- **Customer picker** — searchable by name, phone, or email, with a pinned Walk-in / No customer option.
-- **Checkout note** — fixed single-line field capped at 50 words; saved to MySQL and shown on receipts, Sales search, and CSV export.
-- **FEFO deduction** — ingredient batches are consumed by nearest expiry first. One sale is written atomically with its items and stock changes.
-- **Inventory & Ingredients** — dynamic categories, expiry/batch tracking, low-stock and expiry alerts, stock in, recipes, CSV export.
-- **Sales** — history, search, receipt viewing, voiding by allowed roles, CSV export.
-- **Customers** — customer records, order history, spend tier, and linked sales.
-- **Attendance** — time in/out with lunch and coffee breaks, 2-week schedule cycle, late/absent/undertime flags.
-- **Schedules** — Superadmin/Client set schedules; only Cashier and Inventory users can be scheduled.
-- **Activity Log** — who, when, which action, and before/after values. Passwords are never sent to the browser.
-- **Offline queue** — edits made while offline are queued locally and replayed through `save` on reconnect.
-- **Reports** — inventory value and sales/cashier summaries for allowed roles.
+These are the buttons shown in the sidebar:
+
+- Dashboard
+- Point of Sale
+- Inventory
+- Ingredients
+- Sales History
+- Customers
+- Time In/Out
+- Reports
+- Users
+- Activity Log
 
 ## Frontend modules
 
