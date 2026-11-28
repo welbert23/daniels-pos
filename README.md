@@ -11,19 +11,85 @@ MySQL-backed POS and inventory system for a small food operation. The browser ap
 
 ## How the system works
 
+The functional flow has five stages: entry, delivery, frontend, API/server, and database. The same `api.php` and the same MySQL database are used in both local and live mode.
+
 ```mermaid
 flowchart LR
-    U[User] --> D[Browser device]
-    D --> P[Static frontend on GitHub Pages or localhost]
-    P --> T[Cloudflare tunnel pool, live mode only]
-    T --> A[XAMPP Apache + api.php]
-    A --> M[(MySQL pos_inventory)]
-    M --> A --> P --> D
+    subgraph ENTRY["1 Entry"]
+        U["User<br/>Superadmin · Client · Cashier · Inventory"]
+        A["Action<br/>login · POS checkout · add/edit · stock in · punch · schedules · reports"]
+        D["Device<br/>same-machine browser or another device over HTTPS"]
+        U --> A --> D
+    end
+
+    subgraph DELIVERY["2 Delivery"]
+        P["Static frontend<br/>localhost or GitHub Pages"]
+        S["Seed URL<br/>?r=...&api=URL list"]
+        T["Cloudflare tunnel pool, up to 5<br/>auto-fallback to next URL"]
+        D --> P
+        P --> S
+        S --> T
+    end
+
+    subgraph APP["3 Frontend"]
+        F["index.html + 00-99 JS modules<br/>boot · token · role-aware UI"]
+        Q["Offline queue<br/>localStorage"]
+        T --> F
+        F --> Q
+    end
+
+    subgraph SERVER["4 Server and API"]
+        X["XAMPP Apache<br/>started/repaired by private launchers"]
+        API["api.php router<br/>HMAC token · role checks · SQL actions"]
+        T --> X
+        Q -.->|reconnect| API
+        F -->|apiFetch + X-POS-Token| API
+        X --> API
+    end
+
+    subgraph DATA["5 Database"]
+        DB[("MySQL pos_inventory<br/>users · items · ingredients · customers<br/>transactions · audit_log · attendance · schedules")]
+    end
+
+    API -->|SELECT / INSERT / UPDATE / DELETE| DB
+    DB -->|bootstrap snapshot / rows| API
+    API -->|JSON ok:true or ok:false / 401| F
 ```
 
-Local mode serves the frontend and API through XAMPP. Live mode publishes only the static frontend to GitHub Pages; the browser reaches the private API through a short-lived Cloudflare tunnel. The public build has no embedded API URL.
+Local mode serves both the frontend and the API through XAMPP. Live mode publishes only the static frontend to GitHub Pages; the browser reaches the private API through a short-lived Cloudflare tunnel. The public build has no embedded API URL.
 
-`start-live` opens up to five tunnels, saves the URL list in the private server folder, rebuilds the public site with an empty API config, and generates a seed URL. The seed URL carries a comma-separated API URL list; the browser saves it once and retries the next tunnel if one stops responding.
+`start-live` starts up to five tunnels, saves the URL list in the private server folder, rebuilds the public site with an empty API config, and generates a seed URL. The seed URL carries a comma-separated API URL list. The browser saves that list once, cleans the address back to the short URL, and automatically tries the next tunnel if one stops responding.
+
+### What each stage does
+
+| Stage | Detail |
+|---|---|
+| Entry | A signed-in user performs an action from a browser. The role decides which buttons are visible. |
+| Delivery | Local mode uses the XAMPP URL. Live mode uses the GitHub Pages build plus the tunnel pool. The seed URL is only needed once per device to store the API URL list. |
+| Frontend | `00-api-url.js` and `00-core.js` resolve the API URL, attach the token, and call `apiFetch(action, payload)`. `99-init.js` runs `boot()`: show login without a token, otherwise call `bootstrap` and render the role-aware menu. |
+| Server | Private launchers start/repair MySQL and Apache. `api.php` loads the private config, verifies the HMAC token and role, then runs one SQL action. |
+| Database | MySQL is the source of truth. Bootstrap returns the full snapshot; writes update normalized tables inside a transaction. |
+
+### API actions
+
+| Action | Allowed role / scope | Result |
+|---|---|---|
+| `login` | Anyone with valid credentials | Rate-limited check; returns a signed 12-hour token. |
+| `logout` | Signed-in user | Revokes the current token. |
+| `bootstrap` | Signed-in user | Returns the full database snapshot for the UI. |
+| `cashier_sale` | Superadmin, Client, Cashier | Atomic sale with FEFO ingredient deduction, transaction rows, and audit row. |
+| `save` | Superadmin, Client, Inventory | Syncs the full snapshot in one transaction; also replays the offline queue. User rows are ignored unless Superadmin. |
+| `audit` | Signed-in user | Writes one before/after activity row. |
+| `logs` | Superadmin, Client | Reads recent activity history. |
+| `schedules` / `schedule-save` | Read: signed-in user. Save: Superadmin, Client | Reads or writes the two-week schedule; only Cashier and Inventory users can be scheduled. |
+| `attendance` / `punch` | Signed-in user | Reads role-scoped attendance or records the caller's own time in/out. |
+
+### Two common flows
+
+1. **Opening the app:** browser loads the static page → API URL list and token are resolved → `bootstrap` returns the MySQL snapshot → the router renders the Dashboard and only the menu buttons allowed for that role.
+2. **Making a sale:** cart is confirmed → `cashier_sale` is posted → the API checks ingredient batches by nearest expiry, deducts stock, inserts the transaction and items, writes an audit row, and commits → the receipt and updated stock return to the browser.
+
+If the API is unreachable, edits are queued in `localStorage` and the status chip shows `DB offline — queued`. On reconnect, the queue is posted through `save`, then a fresh `bootstrap` reloads the authoritative data.
 
 ## Access
 
