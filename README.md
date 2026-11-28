@@ -25,7 +25,7 @@ flowchart LR
     subgraph DELIVERY["2 Delivery"]
         P["Static frontend<br/>localhost or GitHub Pages"]
         S["Seed URL<br/>?r=...&api=URL list"]
-        T["Cloudflare tunnel pool, up to 5<br/>auto-fallback to next URL"]
+        T["Cloudflare tunnel pool, 3 by default (configurable up to 5)<br/>auto-fallback to next URL"]
         D --> P
         P --> S
         S --> T
@@ -58,7 +58,7 @@ flowchart LR
 
 Local mode serves both the frontend and the API through XAMPP. Live mode publishes only the static frontend to GitHub Pages; the browser reaches the private API through a short-lived Cloudflare tunnel. The public build has no embedded API URL.
 
-`start-live` starts up to five tunnels, saves the URL list in the private server folder, rebuilds the public site with an empty API config, and generates a seed URL. The seed URL carries a comma-separated API URL list. The browser saves that list once, cleans the address back to the short URL, and automatically tries the next tunnel if one stops responding.
+`start-live` starts 3 tunnels by default (configurable up to 5), saves the URL list in the private server folder, rebuilds the public site with an empty API config, and generates a seed URL. The seed URL carries a comma-separated API URL list. The browser saves that list once, cleans the address back to the short URL, and automatically tries the next tunnel if one stops responding.
 
 ### What each stage does
 
@@ -78,7 +78,7 @@ Local mode serves both the frontend and the API through XAMPP. Live mode publish
 | `logout` | Signed-in user | Revokes the current token. |
 | `bootstrap` | Signed-in user | Returns the full database snapshot for the UI. |
 | `cashier_sale` | Superadmin, Client, Cashier | Atomic sale with FEFO ingredient deduction, transaction rows, and audit row. |
-| `save` | Superadmin, Client, Inventory | Syncs the full snapshot in one transaction; also replays the offline queue. User rows are ignored unless Superadmin. |
+| `save` | Superadmin, Client, Inventory | Syncs the full snapshot in one transaction; user rows are ignored unless Superadmin. |
 | `audit` | Signed-in user | Writes one before/after activity row. |
 | `logs` | Superadmin, Client | Reads recent activity history. |
 | `schedules` / `schedule-save` | Read: signed-in user. Save: Superadmin, Client | Reads or writes the two-week schedule; only Cashier and Inventory users can be scheduled. |
@@ -89,7 +89,7 @@ Local mode serves both the frontend and the API through XAMPP. Live mode publish
 1. **Opening the app:** browser loads the static page → API URL list and token are resolved → `bootstrap` returns the MySQL snapshot → the router renders the Dashboard and only the menu buttons allowed for that role.
 2. **Making a sale:** cart is confirmed → `cashier_sale` is posted → the API checks ingredient batches by nearest expiry, deducts stock, inserts the transaction and items, writes an audit row, and commits → the receipt and updated stock return to the browser.
 
-If the API is unreachable, edits are queued in `localStorage` and the status chip shows `DB offline — queued`. On reconnect, the queue is posted through `save`, then a fresh `bootstrap` reloads the authoritative data.
+If the API is unreachable, edits are queued in `localStorage` and the status chip shows `DB offline — queued`. On the next app load or manual **↻ Reload DB**, `pushQueued()` replays the queued snapshot and then a fresh `bootstrap` reloads authoritative data; automatic reconnect posts `save` directly.
 
 ## Access
 
@@ -106,10 +106,10 @@ Start/repair is handled by the private server launchers (`start-pos.bat`, `start
 |---|---|
 | Superadmin | Everything, including Users, DB tools, and full audit history |
 | Client | POS, inventory, ingredients, customers, sales, reports, schedules; no Users or DB tools |
-| Cashier | POS checkout, sales history, own time in/out; read-only catalog views |
-| Inventory | Add/edit items and ingredients, stock in, recipes; no delete and no POS |
+| Cashier | POS checkout, sales history, customers, own time in/out; read-only catalog views |
+| Inventory | Add/edit items and ingredients; stock in, recipes; no delete and no POS |
 
-Role checks are enforced by `api.php`; buttons are also hidden in the frontend to match the role.
+API actions are role-gated server-side by `api.php`; per-entity edit/delete buttons are also hidden in the frontend.
 
 ## Main menu
 
@@ -154,8 +154,8 @@ These are the buttons shown in the sidebar:
 - Database: `pos_inventory` in local MySQL.
 - Main tables: users, categories, meta, items, item_recipes, ingredients, customers, transactions, transaction_items, attendance, schedules, audit_log, login_attempts, revoked_tokens.
 - Login is rate-limited. Log out revokes the token server-side; password resets bump `token_epoch` to sign out other sessions.
-- `config.local.php`, generated URL files, logs, and backups stay in the private server repo.
-- `file://` access is restricted to a small import-related action set and can be disabled in private config.
+- `config.local.php`, `api-url.txt`, `api-urls.txt`, and logs stay in the private server; `live-url.txt` and `seed-url.txt` are generated under `POS-System\app\runtime` (gitignored); backups live in `POS-Backups`.
+- `file://` access is restricted to `login`, `logout`, `bootstrap`, `save`, `audit`, `cashier_sale` actions (not import-related).
 
 ## Glossary
 
@@ -180,17 +180,17 @@ Beginner and program terms used in this README and in the code:
 | `api.php` | The single private PHP endpoint and router for all API actions. |
 | `apiFetch()` | Frontend helper that calls `api.php?action=...` and attaches the token. |
 | `bootstrap` | Action that returns the full MySQL snapshot used to render the app. |
-| `save` | Action that syncs the full snapshot into MySQL in one transaction; also replays the offline queue. |
+| `save` | Action that syncs the full snapshot into MySQL in one transaction. |
 | `cashier_sale` | Atomic sale action with FEFO ingredient deduction and audit write. |
 | `FEFO` | First-expiring, first-out: ingredient batches are consumed by nearest expiry first. |
 | `token` / `X-POS-Token` | Signed 12-hour credential sent with each request. |
 | `bcrypt` / `HMAC-SHA256` | Password hashing and token signing used by the private API. |
 | `token_epoch` | Per-user counter bumped on password reset to invalidate older sessions. |
 | `role gate` | Server-side `requireRole()` check; frontend buttons are hidden to match. |
-| `localStorage` | Browser storage for cached DB, token, URL list, and offline queue. |
-| `offline queue` | Snapshot saved locally when the API is unreachable, then replayed on reconnect. |
+| `localStorage` | Browser storage for offline snapshot, token, URL list, and offline queue. |
+| `offline queue` | Snapshot saved locally when the API is unreachable, then replayed by `pushQueued()` after bootstrap. |
 | `seed URL` | One-time link carrying a comma-separated API URL list. |
-| `tunnel pool` | Up to five short-lived Cloudflare HTTPS tunnels with automatic fallback. |
+| `tunnel pool` | 3 short-lived Cloudflare HTTPS tunnels by default (configurable up to 5), with automatic fallback. |
 | `build-pages.ps1` | Script that copies `app/` to `docs/` and blanks the API config before publishing. |
 
 ## Troubleshooting
@@ -198,7 +198,7 @@ Beginner and program terms used in this README and in the code:
 | Symptom | What to do |
 |---|---|
 | Stale UI after an update | Hard refresh, or run the local launcher again |
-| `DB offline — queued` | Start XAMPP/MySQL again; queued edits replay on reconnect |
+| `DB offline - queued` (bootstrap) / `DB offline — queued` (save) | Start XAMPP/MySQL again, then reload the app or click **↻ Reload DB** to sync the queue |
 | `Session expired` | Sign in again |
 | Live URL 404/CORS | Run `start-live` again; tunnel URLs change on restart |
 | No schedule flags | Set a schedule as Superadmin/Client first |

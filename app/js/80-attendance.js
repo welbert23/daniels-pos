@@ -10,8 +10,9 @@ const ATT_STATUS={in:'ON DUTY',lunch:'LUNCH BREAK',back:'BACK FROM LUNCH',coffee
 const ATT_SHORT={in:'IN',lunch:'LUNCH',back:'BACK',coffee:'COFFEE',back2:'BACK',done:'DONE'};
 const DAY_LIST=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const SCHEDULABLE=r=>r==='cashier'||r==='inventory';
-let attDate=todayStr(),_schedCache={},attUserFilter='';
+let attDate=todayStr(),punchDate='',_schedCache={},attUserFilter='';
 function localStamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`}
+function punchStamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${punchDate||todayStr()} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`}
 function fmtClock(s){const m=String(s||'').match(/(\d{2}):(\d{2})/);if(!m)return '—';let h=+m[1];const ap=h>=12?'PM':'AM';h=h%12||12;return `${h}:${m[2]} ${ap}`}
 function fmtShortClock(s){const m=String(s||'').match(/(\d{2}):(\d{2})/);return m?`${m[1]}:${m[2]}`:'—'}
 function attMins(a,b){if(!a||!b)return null;const x=Date.parse(String(a).replace(' ','T')),y=Date.parse(String(b).replace(' ','T'));return isNaN(x)||isNaN(y)?null:Math.max(0,Math.round((y-x)/60000))}
@@ -37,6 +38,7 @@ function shiftAttCycle(dir){
   const p=n=>String(n).padStart(2,'0');
   const d=new Date(attDate+'T12:00:00');d.setDate(d.getDate()+dir*14);
   attDate=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+  punchDate='';
   renderAttendance();
 }
 function minsOfClock(v){const m=String(v||'').match(/^(\d{1,2}):(\d{2})/);return m?(+m[1]*60+ +m[2]):null}
@@ -95,7 +97,7 @@ async function renderAttendance(){
     })).join('');
     $('#content').innerHTML=`
       <div class="toolrow"><div><b style="font-size:13px">${esc(attDate)} · ${esc(day)} · Week ${week}</b><br><small style="color:var(--mut2)">Cycle ${esc(start)} to ${esc(end)}</small></div><div class="spacer"></div>
-        <input type="date" value="${esc(attDate)}" onchange="attDate=this.value;renderAttendance()" style="padding:8px;border:2px solid var(--border);border-radius:10px;font-weight:700;background:var(--surface)">
+        <input type="date" value="${esc(attDate)}" onchange="attDate=this.value;punchDate=this.value;renderAttendance()" style="padding:8px;border:2px solid var(--border);border-radius:10px;font-weight:700;background:var(--surface)">
         <button class="btn btn-ghost btn-sm" onclick="shiftAttCycle(-1)" title="Previous 2 weeks">« Prev 2 Weeks</button>
         <button class="btn btn-ghost btn-sm" onclick="shiftAttCycle(1)" title="Next 2 weeks">Next 2 Weeks »</button>
         <label style="font-size:10px;font-weight:700;color:var(--mut2)">User: <select onchange="attUserFilter=this.value;renderAttendance()" style="padding:8px;border:2px solid var(--border);border-radius:10px;font-weight:700;background:var(--surface)">${userOpts}</select></label>
@@ -124,7 +126,7 @@ async function renderAttendance(){
 async function punch(type){
   const s=session()||{},u=(DB.users||[]).find(x=>x.id===s.id)||s;
   try{
-    const j=await(await apiFetch('punch',{method:'POST',body:JSON.stringify({type,ts:localStamp(),user_id:u.id,username:u.username||'',name:u.name||'',role:u.role||''})})).json();
+    const j=await(await apiFetch('punch',{method:'POST',body:JSON.stringify({type,ts:punchStamp(),user_id:u.id,username:u.username||'',name:u.name||'',role:u.role||''})})).json();
     if(!j.ok)return toast(j.error||'Punch failed');
     logAction('punch','attendance',j.row.id,PUNCH_LABEL[type]+' · '+(u.name||''));
     toast(PUNCH_LABEL[type]+' recorded — '+fmtClock(j.row[type]));
